@@ -19,7 +19,7 @@ class.project <- function(dfs, name) {
 
 # Strip a project data frame from unused columns
 prepare.project.df <- function(a) {
-  a[,c(7:33)]
+  a[,c(7:32)]
 }
 
 rf.train <- function(model, train.set) {
@@ -73,8 +73,8 @@ cross.validation <- function(model, classifier, sampler, df, num_samples, num_ru
               interm$run <- n
               interm
   }
-  
-  # Somewhere along the way, numbers are converted to characters. 
+
+  # Somewhere along the way, numbers are converted to characters.
   # Too busy to investigate why
   result$auc <- as.numeric(result$auc)
   result$acc <- as.numeric(result$acc)

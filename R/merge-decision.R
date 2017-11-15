@@ -8,10 +8,9 @@ source(file = "R/classification.R")
 merge.decision.model <- merged ~ team_size + num_commits + files_changed +
   perc_external_contribs + sloc + src_churn + test_churn + num_comments +
   commits_on_files_touched +  test_lines_per_kloc + prev_pullreqs +
-  requester_succ_rate + main_team_member + conflict + forward_links + 
-  num_participants
+  requester_succ_rate + main_team_member + conflict + forward_links
 
-# Returns a list l where 
+# Returns a list l where
 # l[1] training dataset
 # l[2] testing dataset
 prepare.data.mergedecision <- function(df, num_samples) {
@@ -57,7 +56,7 @@ run.classifiers.mergedecision <- function(model, train, test, uniq = "") {
 #   metrics <- classification.perf.metrics("svm", pred.obj)
 #   results[2,] <- c("svm", metrics$auc, metrics$acc, metrics$prec, metrics$rec)
 #   svmperf <- performance(pred.obj, "tpr","fpr")
-  
+
   #
   ### Binary logistic regression
   logmodel <- binlog.train(model, train)
@@ -65,7 +64,7 @@ run.classifiers.mergedecision <- function(model, train, test, uniq = "") {
   pred.obj <- prediction(predictions, test$merged)
   metrics <- classification.perf.metrics("binlogreg", pred.obj)
   results[3,] <- c("binlogregr", metrics$auc, metrics$acc, metrics$prec, metrics$rec)
-  
+
   #
   ### Naive Bayes
   bayesModel <- bayes.train(model, train)
@@ -73,7 +72,7 @@ run.classifiers.mergedecision <- function(model, train, test, uniq = "") {
   pred.obj <- prediction(predictions[,2], test$merged)
   metrics <- classification.perf.metrics("naive bayes", pred.obj)
   results[4,] <- c("naive bayes", metrics$auc, metrics$acc, metrics$prec, metrics$rec)
-  
+
   subset(results, auc > 0)
 }
 

@@ -107,7 +107,7 @@ p <- ggplot(merged.perc, aes(x = order, y = ratio_merged)) +
   xlab("Project")
 store.pdf(p, plot.location, 'perc-merged.pdf')
 
-# This is to check very low scores in merge % is due to the lack 
+# This is to check very low scores in merge % is due to the lack
 # of data as a result of the project not having an activated issue tracker
 # check.has.bugs(df, credentials = "username:password") {
 #   has.bugs <- function(x) {
@@ -156,7 +156,7 @@ store.pdf(p, plot.location, "pr-num-comments-hist.pdf")
 ### Dataset descriptive statistics
 descr.stats <- data.frame(
   Feature = c('num_commits', 'src_churn', 'test_churn', 'files_changed',
-              'num_comments', 'num_participants', 'sloc', 'team_size',
+              'num_comments', 'sloc', 'team_size',
               'perc_external_contribs', 'commits_on_files_touched',
               'test_lines_per_kloc', 'prev_pullreqs', 'requester_succ_rate'),
   Description = c(
@@ -165,7 +165,7 @@ descr.stats <- data.frame(
     "Number of test lines changed in the pull request.",
     "Number of files touched by the pull request.",
     "The total number of comments (discussion and code review).",
-    "Number of participants in the pull request discussion",
+    # "Number of participants in the pull request discussion",
     #"The word conflict appears in the pull request comments.",
     #"The pull request comments include links to other pull requests.",
     "Executable lines of code at pull request merge time.",
@@ -266,8 +266,8 @@ p <- ggplot(teams, aes(x = team, y = mergetime_minutes)) +
 store.pdf(p, plot.location, "merge-internal-external.pdf")
 
 # Rank correlation to see whether the populations differ significantly
-ranksum(subset(merged, main_team_member == T)$mergetime_minutes, 
-        subset(merged, main_team_member == F)$mergetime_minutes, 
+ranksum(subset(merged, main_team_member == T)$mergetime_minutes,
+        subset(merged, main_team_member == F)$mergetime_minutes,
         "pull request origin and merge time")
 
 # Pull requests merge time at the proejct level
@@ -334,7 +334,7 @@ ranksum(subset(aggregate(cbind(test_lines_per_kloc, mergetime_minutes) ~ project
         "good testing vs mergetime")
 
 mean.testing.per.project <- aggregate(cbind(test_lines_per_kloc, mergetime_minutes) ~ project_name, merged, mean)
-ranksum(head(mean.testing.per.project[order(mean.testing.per.project$test_lines_per_kloc),], 20)$mergetime_minutes, 
+ranksum(head(mean.testing.per.project[order(mean.testing.per.project$test_lines_per_kloc),], 20)$mergetime_minutes,
         tail(mean.testing.per.project[order(mean.testing.per.project$test_lines_per_kloc),], 20)$mergetime_minutes)
 
 # Pull request discusion
@@ -351,7 +351,7 @@ cor.test(non_merged$lifetime_minutes, non_merged$num_comments, method = "spearma
 has.code.review <- function(row) {
   q = sprintf("select count(*) as cnt from pull_request_comments prc where prc.pull_request_id = %d", row$pull_req_id)
   printf("%s/%s",row$project_name,row$github_id)
-  res <- dbSendQuery(con,q) 
+  res <- dbSendQuery(con,q)
   num_code_review <- fetch(res, n = -1)
   num_code_review > 0
 }
@@ -369,13 +369,13 @@ ranksum(subset(reviewed, merged == T)$lifetime_minutes,
 num.participants <- function(row) {
   q = sprintf("select count(distinct(user_id)) as participants from (select user_id from pull_request_comments where pull_request_id = %s union select user_id from issue_comments ic, issues i where i.id = ic.issue_id and i.pull_request_id = %s) as users", row[1], row[1])
   printf("%s/%s",row[2],row[4])
-  res <- dbSendQuery(con,q) 
+  res <- dbSendQuery(con,q)
   participants <- fetch(res, n = -1)$participants
   print(participants)
   participants
 }
 
-all$num_participants <- apply(all, 1, num.participants)
+# all$num_participants <- apply(all, 1, num.participants)
 
 
 # Pull request conflicts, do they affect merge time?
