@@ -28,3 +28,4 @@ tmp
 *.swp
 doc/build
 .ipynb_checkpoints/*
+__temp__.*
