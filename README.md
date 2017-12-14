@@ -8,7 +8,7 @@ You only need the following in case you want to regenerate (or generate more)
 the data files used for the analysis. The data files used in the paper can be
 found in `data/*.csv`.
 
-Make sure that Ruby 1.9.3 is installed on your machine. You can 
+Make sure that Ruby 1.9.3 is installed on your machine. You can
 try [RVM](https://rvm.io/), if it is not. Then, it should suffice
 to do:
 
@@ -19,7 +19,7 @@ gem install mysql2
 </pre>
 
 The executable commands in this project inherit functionality from the
-[GHTorrent](https://github.com/gousiosg/github-mirror) libraries. 
+[GHTorrent](https://github.com/gousiosg/github-mirror) libraries.
 To work, they need the GHTorrent MongoDB data and a recent version of
 the GHTorrent MySQL database. For that, you may use the data from
 [ghtorrent.org](http://ghtorrent.org).
@@ -29,7 +29,7 @@ In addition to command specific arguments, the commands use the same
 can find a template `config.yaml` file
 [here](https://github.com/gousiosg/github-mirror/blob/master/config.yaml.tmpl).
 The analysis scripts only are only interested in the connection details for
-MySQL and MongoDB, and the location of a temporary directory 
+MySQL and MongoDB, and the location of a temporary directory
 (the `cache_dir` directory).
 
 ## Analyzing the data
@@ -48,7 +48,7 @@ To produce the required data files, first run the
   ruby -Ibin bin/pull_req_data_extraction.rb -c config.yaml owner repo lang
 ```
 
-where: 
+where:
 * `owner` is the project owner
 * `repo` is the name of the repository
 * `lang` is the main repository language as reported by Github. At the moment,
@@ -57,11 +57,11 @@ only `ruby`, `java`, `python` and `scala` projects can produce fully compatible 
 file.
 
 The projects we analyzed in the paper are included in [this project list](projects.txt). The projects that are commented out were excluded
-for reasons identified in the paper. 
+for reasons identified in the paper.
 
 The data extraction script extracts several variables
 for each pull request and prints to `STDOUT` a comma-separated
-line for each pull request using the following fields: 
+line for each pull request using the following fields:
 
 * `pull_req_id`: The database id for the pull request
 * `project_name`: The name of the project (same for all lines)
@@ -111,7 +111,7 @@ repository
 project's main team at the time the pull request was opened.
 
 The following features have been disabled from output: `num_commit_comments`,`num_issue_comments`, `files_added`, `files_deleted`, `files_modified`,
-`src_files`, `doc_files`, `other_files`, `commits_last_month`, `main_team_commits_last_month`. In addition, the following features are 
+`src_files`, `doc_files`, `other_files`, `commits_last_month`, `main_team_commits_last_month`. In addition, the following features are
 not used in further analysis even if they are part of the data files:
 `test_cases_per_kloc`,`asserts_per_kloc`, `watchers`, `followers`, `requester`
 
@@ -137,7 +137,7 @@ test files. Test cases are recognized by "grepping" for `test*` (RUnit),
 ####Processing data with R
 
 The statistical analysis is done with R. Generally, it suffices to
-do 
+do
 
 ```bash
   cd pullreqs
@@ -158,12 +158,14 @@ mysql.host = "127.0.0.1"
 
 * [R/pullreq-stats.R](https://github.com/gousiosg/pullreqs/blob/master/R/pullreq-stats.R) Pull request descriptive statistics (analysis of the data files)
 
-* [R/run-merge-decision-classifiers.R](https://github.com/gousiosg/pullreqs/blob/master/R/run-merge-decision-classifiers.R): Cross validation runs for the 
+* [R/run-merge-decision-classifiers.R](https://github.com/gousiosg/pullreqs/blob/master/R/run-merge-decision-classifiers.R): Cross validation runs for the
 pull request merge decision classifiers
 
-* [R/run-mergetime-classifiers.R](https://github.com/gousiosg/pullreqs/blob/master/R/run-mergetime-classifiers.R): Cross validation runs for the 
+* [R/run-mergetime-classifiers.R](https://github.com/gousiosg/pullreqs/blob/master/R/run-mergetime-classifiers.R): Cross validation runs for the
 pull request merge time classifiers
 
 * [R/var-importance.R](https://github.com/gousiosg/pullreqs/blob/master/R/var-importance.R) Generate the variable importance plots for choosing important
 features
 
+
+./ght-restore-mysql -u ghtorrentuser -d ghtorrent_restore -p ghtorrentpassword .
