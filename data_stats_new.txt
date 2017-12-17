@@ -64,13 +64,3 @@ Type 'q()' to quit R.
 > 
 > # Original repos
 > res <- dbSendQuery(con, "select count(*) as cnt from projects where forked_from is null and deleted is false and name not regexp '^.*\\.github\\.com$' and name <> 'try_git' and name <> 'dotfiles' and name <> 'vimfiles'")
-> orig_repos <- fetch(res, n = -1)
-> print(sprintf("Original repos: %f",orig_repos$cnt))
-[1] "Original repos: 36419081.000000"
-> 
-> # % of original repos 
-> print(sprintf("Original repos: %f",(orig_repos$cnt/repos$cnt) * 100))
-[1] "Original repos: 56.671565"
-> 
-> # Original repositories that received a single commit in 2013
-> res <- dbSendQuery(con, "select count(*) as cnt from projects p where forked_from is null and deleted is false and name not regexp '^.*\\.github\\.com$' and name <> 'try_git' and name <> 'dotfiles' and name <> 'vimfiles' and exists ( select * from project_commits pc, commits c where  pc.project_id = p.id and  c.id = pc.commit_id and unix_timestamp(c.created_at) between 1359676800 and 1377993600)")

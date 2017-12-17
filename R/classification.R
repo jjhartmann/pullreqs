@@ -22,8 +22,19 @@ prepare.project.df <- function(a) {
   a[,c(7:32)]
 }
 
+prepare.project.df_new <- function(a) {
+  subset(a, select=c('lifetime_minutes', 'merged_using', 'conflict',
+         'forward_links', 'team_size', 'num_commits', 'num_comments',
+         'files_changed', 'perc_external_contribs', 'sloc', 'src_churn',
+         'test_churn', 'commits_on_files_touched', 'test_lines_per_kloc',
+         'test_cases_per_kloc', 'asserts_per_kloc', 'stars', 'requester',
+         'prev_pullreqs', 'requester_succ_rate', 'followers', 'intra_branch',
+         'main_team_member', 'merged'))
+}
+
+
 rf.train <- function(model, train.set) {
-  rfmodel <- randomForest(model, data=train.set, importance = T)
+  rfmodel <- randomForest(model, data=train.set, importance = TRUE)
   print(rfmodel)
   print(importance(rfmodel))
   varImpPlot(rfmodel, type=1)
@@ -64,20 +75,25 @@ bayes.train <- function(model, train.set) {
 # Run a cross validation round, return a dataframe with all results added
 # sampler is f: data.frame -> Int -> list
 # classifier is f: data.frame -> Int -> list
-cross.validation <- function(model, classifier, sampler, df, num_samples, num_runs = 10) {
-  result <- foreach(n=1:num_runs, .combine=rbind) %dopar% {
+cross.validation <- function(model, classifier, sampler, df, num_samples, num_runs = 10)
+{
+  result <- foreach(n=1:num_runs, .combine=rbind) %dopar%
+  {
               dataset <- sampler(df, num_samples)
-              printf("Running cross.val num_samples: %d, run: %d", num_samples,
-                     n)
+              printf("Running cross.val num_samples: %d, run: %d", num_samples,1)
               interm <- classifier(model, dataset$train, dataset$test)
               interm$run <- n
               interm
   }
+  printf("Finished Loop, converting restuls")
 
   # Somewhere along the way, numbers are converted to characters.
   # Too busy to investigate why
   result$auc <- as.numeric(result$auc)
   result$acc <- as.numeric(result$acc)
+
+  printf("return restuls")
+
   #result$prec <- as.numeric(result$prec)
   #result$rec <- as.numeric(result$rec)
   result

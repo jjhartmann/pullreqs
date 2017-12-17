@@ -9,14 +9,16 @@ library(doMC)
 registerDoMC(num.processes)
 
 # Loading data files
-all <- load.data()
+# all <- load.data()
+all <- load.data_new()
 #all <- load.some(dir=data.file.location, pattern="*.csv$", 10)
 
 run.mergetime.classifiers <- function(df, cases = c(1000, 10000,
                                                     floor(nrow(df)/4),
                                                     floor(nrow(df)/2),
                                                     nrow(df)),
-                                      bins = 3, suffix = "") {
+                                      bins = 3, suffix = "")
+{
   splitter <- get(sprintf("prepare.data.mergetime.%dbins", bins))
   for (i in cases) {
     cvResult <- cross.validation(merge.time.model,

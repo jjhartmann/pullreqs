@@ -24,6 +24,11 @@ load.data <- function() {
   subset(all, !is.na(src_churn))
 }
 
+# Load New data
+load.data_new <- function() {
+  read.csv("../data-new.csv")
+}
+
 # Load all csv files in the provided dir as data frames
 load.all <- function(dir = ".", pattern = "*.csv$") {
   lapply(list.files(path = dir, pattern = pattern, full.names = T),
@@ -54,7 +59,7 @@ load.some <- function(dir = ".", pattern = "*.csv$", howmany = -1) {
 
 load.filter <- function(path) {
   setAs("character", "POSIXct", function(from){as.POSIXct(from, origin = "1970-01-01")})
-  a <- read.csv(path, check.names = T, 
+  a <- read.csv(path, check.names = T,
                 colClasses = c("integer",rep("factor",3), rep("integer", 5),
                                rep("factor", 3), rep("integer", 9),
                                rep("double", 3), "integer",  "factor",
@@ -125,8 +130,8 @@ column.contains.na <- function(df) {
 ranksum <- function (a, b, title = "") {
   w <- wilcox.test(a, b)
   d <- cliffs.d(a, b)
-  printf("%s sizes: a: %d b: %d, medians a: %f b: %f, means a: %f, b: %f, wilcox: %f, p: %f, d: %f", 
-         title, length(a), length(b), median(a), median(b), mean(a), mean(b), w$statistic, 
+  printf("%s sizes: a: %d b: %d, medians a: %f b: %f, means a: %f, b: %f, wilcox: %f, p: %f, d: %f",
+         title, length(a), length(b), median(a), median(b), mean(a), mean(b), w$statistic,
          w$p.value, d)
 }
 

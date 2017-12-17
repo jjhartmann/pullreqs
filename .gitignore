@@ -29,3 +29,4 @@ tmp
 doc/build
 .ipynb_checkpoints/*
 __temp__.*
+.Rproj.user

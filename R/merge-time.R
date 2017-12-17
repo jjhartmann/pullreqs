@@ -15,9 +15,10 @@ merge.time.model = merge_time ~ team_size + files_changed +
 
 prepare.data.mergetime <- function(df, num_samples = nrow(df),
                                    bins = c(0, mean(df$mergetime_minutes), max(df$mergetime_minutes)),
-                                   labels = c('FAST', 'SLOW')) {
+                                   labels = c('FAST', 'SLOW'))
+{
   # Prepare the data for prediction
-  a <- prepare.project.df(df)
+  a <- prepare.project.df_new(df)
 
   # sample filter pull-requests that have not been merged
   a <- subset(a, merged == TRUE)
@@ -59,7 +60,7 @@ prepare.data.mergetime.4bins <- function(df, num_samples = nrow(df)) {
 }
 
 format.results <- function(name, test, predictions) {
-  metrics = data.frame(actual = test$merge_time, 
+  metrics = data.frame(actual = test$merge_time,
                        predicted = as.ordered(predictions))
   if (length(levels(metrics$actual)) == length(levels(metrics$predicted))) {
     metrics$correct <- metrics$actual == metrics$predicted
@@ -108,9 +109,8 @@ run.classifiers.mergetime <- function(model, train, test) {
 #a["log_mergetime"] <- log(a$mergetime_minutes)
 
 # stepwise linear regression
-#lmmodel <- lm(log_mergetime ~ sloc + test_lines_per_1000_lines + num_commits + src_churn + test_churn + files_changed + 
+#lmmodel <- lm(log_mergetime ~ sloc + test_lines_per_1000_lines + num_commits + src_churn + test_churn + files_changed +
 #  perc_external_contribs + requester_succ_rate + team_size + prev_pullreqs + commits_on_files_touched, data=a);
 #step <- stepAIC(lmmodel, direction="both")
-#step$anova # display results 
+#step$anova # display results
 #summary(step$model)
-

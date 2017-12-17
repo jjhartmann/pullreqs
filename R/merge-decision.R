@@ -15,7 +15,7 @@ merge.decision.model <- merged ~ team_size + num_commits + files_changed +
 # l[2] testing dataset
 prepare.data.mergedecision <- function(df, num_samples) {
   # Prepare the data for prediction
-  a <- prepare.project.df(df)
+  a <- prepare.project.df_new(df)
 
   if (num_samples >= nrow(a)) {
     num_samples = nrow(a) - 1
@@ -25,7 +25,7 @@ prepare.data.mergedecision <- function(df, num_samples) {
   a <- a[sample(nrow(a), size=num_samples), ]
 
   # Remove column mergetime_minutes as it contains NAs
-  a <- a[-c(1)]
+  # a <- a[-c(1)]
 
   # split data into training and test data
   a.train <- a[1:floor(nrow(a)*.90), ]
@@ -35,21 +35,27 @@ prepare.data.mergedecision <- function(df, num_samples) {
 
 # Returns a dataframe with the AUC, PREC, REC values per classifier
 # Plots classification ROC curves
-run.classifiers.mergedecision <- function(model, train, test, uniq = "") {
+run.classifiers.mergedecision <- function(model, train, test, uniq = "")
+{
   printf("Prior propability: %f", nrow(subset(train, merged == T))/nrow(train))
   sample_size = nrow(train) + nrow(test)
   results = data.frame(classifier = rep(NA, 3), auc = rep(0, 3), acc = rep(0,3),
                        prec = rep(0, 3), rec = rep(0, 3), stringsAsFactors=FALSE)
   #
   ### Random Forest
+  print("Training")
   rfmodel <- rf.train(model, train)
-  predictions <- predict(rfmodel, test, type="prob")
-  pred.obj <- prediction(predictions[,2], test$merged)
+
+  print("Predicting")
+  predictions <- predict(rfmodel, test)
+
+  print("Predictions")
+  pred.obj <- prediction(predictions, test$merged)
   metrics <- classification.perf.metrics("randomforest", pred.obj)
   results[1,] <- c("randomforest", metrics$auc, metrics$acc, metrics$prec, metrics$rec)
 
-  #
-  ### SVM
+
+### SVM
 #   svmmodel <-  svm.train(train)
 #   predictions <- predict(svmmodel, newdata=test, type="prob", probability=TRUE)
 #   pred.obj <- prediction(attr(predictions, "probabilities")[,2], test$merged)
@@ -57,21 +63,23 @@ run.classifiers.mergedecision <- function(model, train, test, uniq = "") {
 #   results[2,] <- c("svm", metrics$auc, metrics$acc, metrics$prec, metrics$rec)
 #   svmperf <- performance(pred.obj, "tpr","fpr")
 
-  #
-  ### Binary logistic regression
-  logmodel <- binlog.train(model, train)
-  predictions <- predict(logmodel, newdata=test)
-  pred.obj <- prediction(predictions, test$merged)
-  metrics <- classification.perf.metrics("binlogreg", pred.obj)
-  results[3,] <- c("binlogregr", metrics$auc, metrics$acc, metrics$prec, metrics$rec)
+  # #
+  # ### Binary logistic regression
+  # print("Binary Lgistic Regression")
+  # logmodel <- binlog.train(model, train)
+  # predictions <- predict(logmodel, newdata=test)
+  # pred.obj <- prediction(predictions, test$merged)
+  # metrics <- classification.perf.metrics("binlogreg", pred.obj)
+  # results[3,] <- c("binlogregr", metrics$auc, metrics$acc, metrics$prec, metrics$rec)
 
   #
-  ### Naive Bayes
-  bayesModel <- bayes.train(model, train)
-  predictions <- predict(bayesModel, newdata=test, type="raw")
-  pred.obj <- prediction(predictions[,2], test$merged)
-  metrics <- classification.perf.metrics("naive bayes", pred.obj)
-  results[4,] <- c("naive bayes", metrics$auc, metrics$acc, metrics$prec, metrics$rec)
+  # ### Naive Bayes
+  # print("Naive Bayes")
+  # bayesModel <- bayes.train(model, train)
+  # predictions <- predict(bayesModel, newdata=test, type="raw")
+  # pred.obj <- prediction(predictions[,2], test$merged)
+  # metrics <- classification.perf.metrics("naive bayes", pred.obj)
+  # results[4,] <- c("naive bayes", metrics$auc, metrics$acc, metrics$prec, metrics$rec)
 
   subset(results, auc > 0)
 }
