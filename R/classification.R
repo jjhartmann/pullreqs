@@ -32,6 +32,15 @@ prepare.project.df_new <- function(a) {
          'main_team_member', 'merged'))
 }
 
+prepare.project.df_mt <- function(a) {
+  subset(a, select=c('lifetime_minutes', 'mergetime_minutes', 'merged_using', 'conflict',
+         'forward_links', 'team_size', 'num_commits', 'num_comments',
+         'files_changed', 'perc_external_contribs', 'sloc', 'src_churn',
+         'test_churn', 'commits_on_files_touched', 'test_lines_per_kloc',
+         'test_cases_per_kloc', 'asserts_per_kloc', 'stars', 'requester',
+         'prev_pullreqs', 'requester_succ_rate', 'followers', 'intra_branch',
+         'main_team_member', 'merged'))
+}
 
 rf.train <- function(model, train.set) {
   rfmodel <- randomForest(model, data=train.set, importance = TRUE)

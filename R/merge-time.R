@@ -18,7 +18,7 @@ prepare.data.mergetime <- function(df, num_samples = nrow(df),
                                    labels = c('FAST', 'SLOW'))
 {
   # Prepare the data for prediction
-  a <- prepare.project.df_new(df)
+  a <- prepare.project.df_mt(df)
 
   # sample filter pull-requests that have not been merged
   a <- subset(a, merged == TRUE)
@@ -84,21 +84,26 @@ run.classifiers.mergetime <- function(model, train, test) {
                        stringsAsFactors=FALSE)
   #
   ### Random Forest
+  print("Traning")
   rfmodel <- rf.train(model, train)
+
+  print("Predicting")
   predictions <- predict(rfmodel, test, type="response")
+  
+  print("Formating")
   results[1,] <- format.results("randomforest", test, predictions)
 
+  # #
+  # ### Multinomial regression
+  # multinommodel <- multinom.train(model, train)
+  # predictions <- predict(multinommodel, test, type="class")
+  # results[2,] <- format.results("multinomregr", test, predictions)
   #
-  ### Multinomial regression
-  multinommodel <- multinom.train(model, train)
-  predictions <- predict(multinommodel, test, type="class")
-  results[2,] <- format.results("multinomregr", test, predictions)
-
-  #
-  ### Naive Bayes
-  bayesModel <- bayes.train(model, train)
-  predictions <- predict(bayesModel, test)
-  results[3,] <- format.results("naivebayes", test, predictions)
+  # #
+  # ### Naive Bayes
+  # bayesModel <- bayes.train(model, train)
+  # predictions <- predict(bayesModel, test)
+  # results[3,] <- format.results("naivebayes", test, predictions)
 
   subset(results, auc > 0)
 }
