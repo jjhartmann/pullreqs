@@ -13,22 +13,22 @@ library(digest)
 library(xtable)
 
 print("Running database queries...")
-con <- dbConnect(dbDriver("MySQL"), user = mysql.user, password = mysql.passwd, 
+con <- dbConnect(dbDriver("MySQL"), user = mysql.user, password = mysql.passwd,
                  dbname = mysql.db, host = mysql.host)
 
 # Overall project statistics
-# if (file.exists(overall.dataset.stats)) {
-#   print(sprintf("%s file found", overall.dataset.stats))
-#   projectstats <- read.csv(file = overall.dataset.stats)
-# } else {
-#   print(sprintf("File not found %s", overall.dataset.stats))
-#   print("Running project stats query, this will take long...")
-#   # This will take a LONG time. Think >0.5 hours.
-#   res <- dbSendQuery(con, "select concat(u.login, '/', p.name) as name, (select count(*) from commits c, project_commits pc    where pc.project_id = p.id and pc.commit_id = c.id) as commits, (select count(*) from watchers where repo_id = p.id) as watchers, (select count(*) from pull_requests where base_repo_id = p.id)   as pull_requests, (select count(*) from issues where repo_id = p.id) as issues, (select count(*)    from project_members where repo_id = p.id) as project_members, (select count(distinct c.author_id)  from commits c, project_commits pc where pc.project_id = p.id and pc.commit_id = c.id) as contributors, (select count(*) from projects p1 where p1.forked_from = p.id) as forks, (select count(*) from issue_comments ic, issues i where ic.issue_id=i.id and i.repo_id = p.id) as issue_comments, (select count(*) from pull_requests pr, pull_request_comments prc where pr.base_repo_id=p.id and prc.pull_request_id = pr.id) as pull_req_comments, p.language from projects  p, users u where p.forked_from is null and p.deleted is false and u.id = p.owner_id group by p.id;")
-#   projectstats <- fetch(res, n = -1)
-#   write.csv(projectstats, file = overall.dataset.stats)
-#   projectstats
-# }
+if (file.exists(overall.dataset.stats)) {
+  print(sprintf("%s file found", overall.dataset.stats))
+  projectstats <- read.csv(file = overall.dataset.stats)
+} else {
+  print(sprintf("File not found %s", overall.dataset.stats))
+  print("Running project stats query, this will take long...")
+  # This will take a LONG time. Think >0.5 hours.
+  res <- dbSendQuery(con, "select concat(u.login, '/', p.name) as name, (select count(*) from commits c, project_commits pc    where pc.project_id = p.id and pc.commit_id = c.id) as commits, (select count(*) from watchers where repo_id = p.id) as watchers, (select count(*) from pull_requests where base_repo_id = p.id)   as pull_requests, (select count(*) from issues where repo_id = p.id) as issues, (select count(*)    from project_members where repo_id = p.id) as project_members, (select count(distinct c.author_id)  from commits c, project_commits pc where pc.project_id = p.id and pc.commit_id = c.id) as contributors, (select count(*) from projects p1 where p1.forked_from = p.id) as forks, (select count(*) from issue_comments ic, issues i where ic.issue_id=i.id and i.repo_id = p.id) as issue_comments, (select count(*) from pull_requests pr, pull_request_comments prc where pr.base_repo_id=p.id and prc.pull_request_id = pr.id) as pull_req_comments, p.language from projects  p, users u where p.forked_from is null and p.deleted is false and u.id = p.owner_id group by p.id;")
+  projectstats <- fetch(res, n = -1)
+  write.csv(projectstats, file = overall.dataset.stats)
+  projectstats
+}
 
 # Total repos
 res <- dbSendQuery(con, "select count(*) as cnt from projects")
@@ -45,7 +45,7 @@ res <- dbSendQuery(con, "select count(*) as cnt from projects where forked_from 
 orig_repos <- fetch(res, n = -1)
 print(sprintf("Original repos: %f",orig_repos$cnt))
 
-# % of original repos 
+# % of original repos
 print(sprintf("Original repos: %f",(orig_repos$cnt/repos$cnt) * 100))
 
 # Original repositories that received a single commit in 2013
@@ -63,12 +63,12 @@ res <- dbSendQuery(con, "select count(*) as cnt from pull_requests")
 pullreqs <- fetch(res, n = -1)
 print(sprintf("Total pull requests: %d",pullreqs$cnt))
 
-# % of pull req comments by non-repo members 
+# % of pull req comments by non-repo members
 res <- dbSendQuery(con, "select count(pr.id) as cnt from pull_requests pr, pull_request_comments prc where pr.id = prc.pull_request_id and not exists (select * from project_commits pc, commits c where pc.commit_id = c.id and pc.project_id = pr.base_repo_id and c.author_id = prc.user_id);")
 prc_non_members <- fetch(res, n = -1)
 print(sprintf("Pull request comments by non project members: %f", prc_non_members$cnt))
-# 
-# % of pull req comments by non-repo members 
+#
+# % of pull req comments by non-repo members
 print(sprintf("% comments from non-repo members: %f",(prc_non_members$cnt/pullreqs$cnt) * 100))
 
 # Pull req comments
@@ -87,7 +87,7 @@ print(sprintf("Repos with > 1 committers and 0 pull reqs in 2013: %d", repos_wit
 ## Pull req usage comparison 2012 -- 2013
 
 # Original repositories that have > 1 committers in Feb - Aug 2012
-res <- dbSendQuery(con, "select count(*) as cnt from projects p where forked_from is null and deleted is false and name not regexp '^.*\\.github\\.com$' and name <> 'try_git' and name <> 'dotfiles' and name <> 'vimfiles' and (select count(distinct c.author_id) from project_commits pc, commits c where  pc.project_id = p.id and  c.id = pc.commit_id and unix_timestamp(c.created_at) between 1328054400 and 1346457600) > 1 and not exists (select * from pull_requests pr where p.id = pr.base_repo_id)") 
+res <- dbSendQuery(con, "select count(*) as cnt from projects p where forked_from is null and deleted is false and name not regexp '^.*\\.github\\.com$' and name <> 'try_git' and name <> 'dotfiles' and name <> 'vimfiles' and (select count(distinct c.author_id) from project_commits pc, commits c where  pc.project_id = p.id and  c.id = pc.commit_id and unix_timestamp(c.created_at) between 1328054400 and 1346457600) > 1 and not exists (select * from pull_requests pr where p.id = pr.base_repo_id)")
 repos_with_commits_2012 <- fetch(res, n = -1)
 print(sprintf("Original repos with commits in Feb - Aug 2012: %f", repos_with_commits_2012$cnt))
 
@@ -142,45 +142,45 @@ pullreqs_per_month <- merge(pullreqs_per_month, repos_with_pullreqs_per_month, b
 pullreqs_per_month$cdate <- as.POSIXct(pullreqs_per_month$cdate, origin = "1970-01-01")
 pullreqs_per_month$ratio <- pullreqs_per_month$pull_reqs / pullreqs_per_month$repos
 
-store.pdf(ggplot(pullreqs_per_month, aes(x = cdate)) + 
-   #scale_x_datetime(breaks = date_breaks(width = "6 months")) + 
-   scale_x_datetime(breaks = c(as.POSIXct(1327968000, origin = "1970-01-01"), 
+store.pdf(ggplot(pullreqs_per_month, aes(x = cdate)) +
+   #scale_x_datetime(breaks = date_breaks(width = "6 months")) +
+   scale_x_datetime(breaks = c(as.POSIXct(1327968000, origin = "1970-01-01"),
                                as.POSIXct(1343775600, origin = "1970-01-01"),
                                as.POSIXct(1359676800, origin = "1970-01-01"),
                                as.POSIXct(1375311600, origin = "1970-01-01"))) +
    scale_y_continuous(limits=c(1,5)) +
    geom_line(aes(y = ratio, colour = "1")) +
    stat_smooth(aes(y = ratio, color = "2"), method = "loess", formula = y ~ x^2, size = 1, alpha = 0) +
-   xlab("Date") + 
+   xlab("Date") +
    ylab("Number of pull requests per repo per month")+
    scale_colour_manual(values=c("red", "blue"), labels = c("actual", "trend")) +
-   theme(legend.title=element_blank()), 
+   theme(legend.title=element_blank()),
       plot.location,"num-pullreqs-month.pdf")
 
 pullreqs_per_month <- melt(pullreqs_per_month)
-      
+
 store.pdf(ggplot(pullreqs_per_month, aes(x = cdate, y = value, fill = variable)) +
   scale_x_datetime() +
   geom_bar(position = "dodge", stat = "identity") +
   stat_smooth(method = "loess", formula = y ~ x^2, size = 1, alpha = 0) +
-  facet_grid(. ~ variable) + 
-  scale_y_continuous(limits=c(0,160000)) + 
+  facet_grid(. ~ variable) +
+  scale_y_continuous(limits=c(0,160000)) +
   xlab("Date") + ylab("Number") +
   theme(legend.position="none", axis.text.x = element_text(angle = 90)), plot.location, "pullreqs-per-month.pdf")
-  
+
 # Correlation between pull requests and watchers
 res <- dbSendQuery(con, "select count(pr.id) as pullreqs, (select count(*) from watchers w where w.repo_id = pr.base_repo_id) as watchers from pull_requests pr group by pr.base_repo_id")
 pr_watchers <- fetch(res, n = -1)
 cor_pr_watch <- cor.test(pr_watchers$pullreqs, pr_watchers$watchers, method="spearman")
-print(sprintf("Spearman correlation pullreqs-watchers: %f (n = %d, p = %f)", 
+print(sprintf("Spearman correlation pullreqs-watchers: %f (n = %d, p = %f)",
               cor_pr_watch$estimate, nrow(pr_watchers), cor_pr_watch$p.value))
-      
+
 # Forked repos
 res <- dbSendQuery(con, "select count(*) as cnt from projects where forked_from is not null")
 forked_repos <- fetch(res, n = -1)
 print(sprintf("Perc forked repos: %f", (forked_repos/repos) * 100))
 
-# Issue tracker % usage for projects 
+# Issue tracker % usage for projects
 res <- dbSendQuery(con, "select count(*) as cnt from projects p where p.forked_from is null and p.name not regexp '^.*\\.github\\.com$' and p.name <> 'try_git' and p.name <> 'dotfiles' and p.name <> 'vimfiles' and exists (select pr.id from pull_requests pr, pull_request_history prh where pr.base_repo_id = p.id and prh.pull_request_id = pr.id and year(prh.created_at)=2012) and exists (select i.id from issues i where i.repo_id = p.id and year(i.created_at)=2012)")
 issue_pr_repos <- fetch(res, n = -1)
 print(sprintf("Perc projects with pull reqs and issues (overall): %f", (issue_pr_repos/orig_repos) * 100))
@@ -188,7 +188,7 @@ print(sprintf("Perc projects with pull reqs and issues: %f", (issue_pr_repos/ori
 
 # Commiter raise due to pull requests
 # res <- dbSendQuery(con, "select p.id from projects p, users u, commits c, project_commits pc where p.forked_from is null and u.id = p.owner_id and pc.commit_id = c.id and pc.project_id = p.id  and exists (select c.id from project_commits pc, commits c where year(c.created_at) = 2012 and month (c.created_at)=12 and pc.commit_id = c.id and pc.project_id = p.id )  and exists (select c.id from project_commits pc, commits c where year(c.created_at) < 2007 and pc.commit_id = c.id and pc.project_id = p.id )  and exists (select pr.id from pull_requests pr, pull_request_history prh where prh.pull_request_id = pr.id and pr.base_repo_id = p.id and prh.action='opened' and year(prh.created_at) = 2010)  group by p.id having count(c.id) > 1000 order by p.created_at asc limit 200")
-# Run the above query and handpick projects 
+# Run the above query and handpick projects
 #      1334	rails	rails
 #      3189	junit	KentBeck
 #      6313	jquery	jquery
@@ -201,13 +201,13 @@ print(sprintf("Perc projects with pull reqs and issues: %f", (issue_pr_repos/ori
 res <- dbSendQuery(con, "select p.name as project, last_day(c.created_at) as timestamp, count(distinct c.author_id) as num_authors from commits c, project_commits pc, projects p where pc.commit_id = c.id and pc.project_id = p.id and year(c.created_at) < 2013 and p.id in (3189, 6313, 4367, 18716, 9316, 2602, 847, 5591) group by p.id, month(c.created_at), year(c.created_at) order by p.name, year(c.created_at), month(c.created_at)")
 devs_per_month <- fetch(res, n = -1)
 devs_per_month$month <- as.POSIXct(devs_per_month$timestamp, origin = "1970-01-01")
-store.pdf(ggplot(devs_per_month, aes(x = month, y = num_authors, colour = project)) + 
-        scale_x_datetime() + 
+store.pdf(ggplot(devs_per_month, aes(x = month, y = num_authors, colour = project)) +
+        scale_x_datetime() +
         stat_smooth(method = "loess", formula = y ~ x^2, size = 1, alpha = 0) +
         annotate("pointrange", x = as.POSIXct(1283174614, origin = "1970-01-01"), ymin = 0, ymax = 20, y = 20) +
         annotate("text", x = as.POSIXct(1283174614, origin = "1970-01-01"), y = 20, label ="Github introduces pull requests", size = 4) +
-        ylim(0, 22) + 
-        xlab("Date") + 
+        ylim(0, 22) +
+        xlab("Date") +
         ylab("Number of active committers per month"), plot.location,"num-commiters-after-pr.pdf")
 
 res <- dbSendQuery(con, "select a.project as project, avg(a.num_authors) as avg_after, avg(b.num_authors) as avg_before from (select p.id as project, last_day(c.created_at) as timestamp_after_pr, count(distinct c.author_id) as num_authors  from commits c, project_commits pc, projects p  where pc.commit_id = c.id and pc.project_id = p.id  and exists(select pc1.* from project_commits pc1, commits c1 where pc1.commit_id = c1.id and year(c1.created_at) = 2010 and month(c1.created_at) < 9 and pc1.project_id = p.id)   and c.created_at between makedate(2010, 213) and makedate(2011, 244) and p.forked_from is null group by p.id, month(c.created_at), year(c.created_at)) as a,  (select p.id as project, last_day(c.created_at) as timestamp_before_pr, count(distinct c.author_id) as num_authors from commits c, project_commits pc, projects p  where pc.commit_id = c.id and pc.project_id = p.id and exists(select pc1.* from project_commits pc1, commits c1 where pc1.commit_id = c1.id and year(c1.created_at) = 2010 and month(c1.created_at) < 9 and pc1.project_id = p.id) and c.created_at between makedate(2009, 244) and makedate(2010, 212) and p.forked_from is null group by p.id, month(c.created_at), year(c.created_at)) as b where a.project = b.project and exists(select pr.id from pull_requests pr, pull_request_history prh where pr.base_repo_id = a.project and prh.pull_request_id = pr.id and prh.created_at between makedate(2010, 213) and makedate(2011, 244)) group by a.project")
@@ -224,7 +224,7 @@ ranksum(a$avg_after, a$avg_before)
 res <- dbSendQuery(con, "select count(*) as cnt from pull_requests pr, pull_request_history prh where prh.action = 'opened' and prh.pull_request_id = pr.id and year(prh.created_at) = 2012 and not exists (select c.author_id from commits c, project_commits pc where pc.project_id = pr.base_repo_id and c.created_at < prh.created_at and c.author_id = pr.user_id) and 1 = (select count(*) from pull_request_commits prc where prc.pull_request_id = pr.id)")
 drive_by_pr <- fetch(res, n = -1)$cnt
 print(sprintf("Perc drive by pull requests: %f", (drive_by_pr/opened_pullreqs) * 100))
-print(sprintf("Perc one pull req repos: %f", (drive_by_pr/forked_repos) * 100))    
+print(sprintf("Perc one pull req repos: %f", (drive_by_pr/forked_repos) * 100))
 
 # Load CSV files
 dfs <- load.all(dir=data.file.location, pattern="*.csv$")
@@ -247,30 +247,30 @@ for (pid in project_ids) {
   comments <- rbind(comments, d)
   comments
 }
-      
+
 comments <- subset(comments, num_users > 0 & num_comments >0)
 processed_comments <- sqldf("select project_name, (select c1.num_users from comments c1 where c1.p_id = c.p_id and c1.is_member = 0)/sum(c.num_users) as commenters, (select c2.num_comments from comments c2 where c2.p_id = c.p_id and c2.is_member = 0)/sum(c.num_comments) as comments from comments c group by c.p_id", drv="SQLite")
 processed_comments <- melt(processed_comments, 'project_name', na.rm = TRUE)
 processed_comments$project_name <- as.factor(processed_comments$project_name)
-processed_comments$value <- processed_comments$value * 100   
+processed_comments$value <- processed_comments$value * 100
 
 #processed_comments$foo <- match(processed_comments$value[processed_comments$variable == "comments"], sort(processed_comments$value[processed_comments$variable == "comments"]))
 processed_comments$foo <- match(processed_comments$value[processed_comments$variable == "commenters"], sort(processed_comments$value[processed_comments$variable == "commenters"]))
 processed_comments$foo <- as.factor(processed_comments$foo)
-p <- ggplot(processed_comments, aes(x = foo, y = value, fill = variable)) + 
+p <- ggplot(processed_comments, aes(x = foo, y = value, fill = variable)) +
         scale_x_discrete() + xlab("Project") + ylab("%") +
-        geom_bar(position="dodge") + 
+        geom_bar(position="dodge") +
         #theme(axis.text.x=element_text(angle = 90, size = 6), legend.position="none") +
         theme(axis.text.x=element_blank(), legend.position="none") +
         #ggtitle("% of external commenters/comments per project") +
         facet_grid(. ~ variable)
-        
+
 store.pdf(p, plot.location, "perc-external-commenters-comments.pdf")
 
 # Code review, pimp the data frame with info
 has.code.review <- function(pr_id) {
   q = sprintf("select count(*) as cnt from pull_request_comments prc where prc.pull_request_id = %d", pr_id)
-  res <- dbSendQuery(con,q) 
+  res <- dbSendQuery(con,q)
   num_code_review <- fetch(res, n = -1)
   num_code_review > 0
 }
@@ -295,7 +295,7 @@ cache <- new.env()
 
 overall.stats <- data.frame(
   description = c('Number of participants', 'Number of comments',
-                  'Number of commits', 'Time to merge (min)', 
+                  'Number of commits', 'Time to merge (min)',
                   'Time to close (min)'),
   query = c(
     "select (select count(distinct(prh.actor_id)) from pull_request_history prh where prh.pull_request_id = pr.id) +  (select count(distinct(ie.actor_id)) from issue_events ie, issues i where i.id = ie.issue_id and i.pull_request_id = pr.id) as participants from pull_requests pr group by id;",
@@ -338,11 +338,10 @@ overall.stats$histogram <- lapply(overall.stats$query, function(x){
 })
 
 
-table <- xtable(overall.stats[,-c(2)], label="tab.overall.stats", 
+table <- xtable(overall.stats[,-c(2)], label="tab.overall.stats",
        caption="Descriptive statistics for pull requests across all projects in the GHTorrent dataset (1.8M). Historgrams are in log scale.",
        align = c("r","r", rep("c", 7)))
 print.xtable(table, file = paste(latex.location, "overall-stats.tex", sep = "/"),
              floating.environment = "table*",
              include.rownames = F, size = c(-1),
              sanitize.text.function = function(str)gsub("_","\\_",str,fixed=TRUE))
-
