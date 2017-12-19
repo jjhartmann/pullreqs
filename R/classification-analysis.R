@@ -6,8 +6,8 @@ source(file = "R/variables.R")
 
 library(ggplot2)
 
-merge.time.data = read.csv("merge-time-cv-10k.csv")
-merge.decision.data = read.csv("merge-decision-cv-10k.csv")
+merge.time.data = read.csv("merge-time-2-cv-50000.csv")
+merge.decision.data = read.csv("merge-decision-2-cv-50000.csv")
 
 aggregate(auc ~ classifier, merge.time.data, mean)
 aggregate(acc ~ classifier, merge.time.data, mean)
