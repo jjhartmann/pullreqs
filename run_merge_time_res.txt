@@ -1,0 +1,483 @@
+
+R version 3.3.2 (2016-10-31) -- "Sincere Pumpkin Patch"
+Copyright (C) 2016 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin14.5.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> #
+> # Merge time classifiers
+> # Clean up workspace
+> rm(list = ls(all = TRUE))
+> 
+> source(file = "R/merge-time.R")
+> 
+> library(doMC)
+> registerDoMC(num.processes)
+> 
+> # Loading data files
+> # all <- load.data()
+> all <- load.data_new()
+> #all <- load.some(dir=data.file.location, pattern="*.csv$", 10)
+> 
+> run.mergetime.classifiers <- function(df, cases = c(1000, 10000,
++                                                     floor(nrow(df)/4),
++                                                     floor(nrow(df)/2),
++                                                     nrow(df)),
++                                       bins = 3, suffix = "")
++ {
++   splitter <- get(sprintf("prepare.data.mergetime.%dbins", bins))
++   for (i in cases) {
++     cvResult <- cross.validation(merge.time.model,
++                                  run.classifiers.mergetime,
++                                  splitter, df, i, 10)
++     write.csv(cvResult, file = sprintf("merge-time-cv-%dbins-%d%s.csv", bins, i, suffix))
++     cross.validation.plot(cvResult,
++                           sprintf("Merge time task cross validation (%d classes, %d items)",bins, i),
++                           sprintf("merge-time-cv-%dbins-%d%s.pdf",bins, i, suffix))
++   }
++ }
+> # FxNSdoWuo4<Z
+> run.mergetime.classifiers(all)
+[1] "Running cross.val num_samples: 1000, run: 1"
+[1] "Running cross.val num_samples: 1000, run: 1"
+[1] "Running cross.val num_samples: 1000, run: 1"
+[1] "Running cross.val num_samples: 1000, run: 1"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 3
+
+        OOB estimate of  error rate: 49.67%
+Confusion matrix:
+     HOUR DAY REST class.error
+HOUR  140  79   55   0.4890511
+DAY    84 126  100   0.5935484
+REST   42  87  187   0.4082278
+                               HOUR        DAY       REST MeanDecreaseAccuracy
+team_size                 7.3860018  2.1053836  2.1852786             6.914133
+files_changed             4.7652370 -5.6684562  4.0148424             1.958376
+perc_external_contribs    2.7933714  2.0421928  3.9408812             5.138801
+sloc                      1.5001202  8.9877914  0.5736982             7.445028
+src_churn                10.2743234  3.6096845 18.2130411            19.005028
+test_churn                8.6079747 -2.8812494  1.5339154             3.704333
+commits_on_files_touched  0.1790954 -2.8157368  3.5580604             0.389818
+test_lines_per_kloc       9.7688574  5.0302811  5.5546891            11.876013
+prev_pullreqs             2.7313906  3.2797312  6.6801706             7.960815
+requester_succ_rate       9.7915663 -0.9291409 11.9576983            12.890831
+main_team_member          4.2634680  2.2155437 11.8356175            12.426957
+conflict                  0.0000000  0.0000000  0.0000000             0.000000
+forward_links             1.2374077 -0.9869093  1.5021499             1.076672
+                         MeanDecreaseGini
+team_size                      60.5052955
+files_changed                  36.6181143
+perc_external_contribs         69.1844926
+sloc                           69.0175705
+src_churn                      71.0987901
+test_churn                     30.8106427
+commits_on_files_touched       55.5643015
+test_lines_per_kloc            75.5650847
+prev_pullreqs                  55.0047675
+requester_succ_rate            50.1726345
+main_team_member               11.6127388
+conflict                        0.0000000
+forward_links                   0.8970336
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 3
+
+        OOB estimate of  error rate: 54.44%
+Confusion matrix:
+     HOUR DAY REST class.error
+HOUR  197  64   65   0.3957055
+DAY   116  60   98   0.7810219
+REST   90  57  153   0.4900000
+                              HOUR        DAY        REST MeanDecreaseAccuracy
+team_size                12.665565  1.0648224  7.83380975           13.1517590
+files_changed             5.850908  3.4470460 -3.55184904            3.4072414
+perc_external_contribs    4.565816 -3.6410591 -2.26235158           -0.7421366
+sloc                      1.242545 -1.0516172  3.73745823            2.3430247
+src_churn                 9.507320  1.4651527  7.14472708           10.4927813
+test_churn                9.619003  3.8198588  8.19188646           13.2416875
+commits_on_files_touched 10.917760 -0.7536446  0.03135597            6.6450192
+test_lines_per_kloc       7.928487  0.3163896  4.72572528            7.7445190
+prev_pullreqs             9.040821 -5.9838587  6.15540351            6.3917364
+requester_succ_rate      13.108345  1.1265704  6.77230891           12.9113111
+main_team_member         13.037287 -8.3487746 12.45704307           11.5295728
+conflict                  0.000000  0.0000000  0.00000000            0.0000000
+forward_links            -1.561759 -0.7665032  0.10738912           -1.3525838
+                         MeanDecreaseGini
+team_size                      65.9659214
+files_changed                  33.6719405
+perc_external_contribs         68.8476557
+sloc                           73.4920264
+src_churn                      63.1796663
+test_churn                     33.6146444
+commits_on_files_touched       58.9887955
+test_lines_per_kloc            68.7875225
+prev_pullreqs                  54.3378785
+requester_succ_rate            49.8101643
+main_team_member               11.2416703
+conflict                        0.0000000
+forward_links                   0.8023105
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 3
+
+        OOB estimate of  error rate: 53.56%
+Confusion matrix:
+     HOUR DAY REST class.error
+HOUR  159  83   55   0.4646465
+DAY   105  79  101   0.7228070
+REST   67  71  180   0.4339623
+                               HOUR          DAY       REST
+team_size                 7.3476281 -0.131680657  6.8231196
+files_changed             4.9364325 -1.977120714 -0.2004585
+perc_external_contribs    1.3238512  1.066656461  1.2453950
+sloc                     -2.6667103  2.483712829  0.6953420
+src_churn                 5.1996408  5.738531966 17.8990493
+test_churn                9.8386954 -2.960850808 17.6200559
+commits_on_files_touched -1.4793020  0.976259036  7.6665816
+test_lines_per_kloc       0.4479636  0.004325224  3.2798249
+prev_pullreqs             3.3881774  0.436146343  3.3043634
+requester_succ_rate       9.8691973  1.413764360  8.0989674
+main_team_member          8.6053908 -1.322334110  0.9920242
+conflict                  0.0000000  0.000000000  0.0000000
+forward_links             2.9487527  0.620114676  0.4978897
+                         MeanDecreaseAccuracy MeanDecreaseGini
+team_size                           7.9887783        65.811573
+files_changed                       1.6352483        38.203316
+perc_external_contribs              2.3145709        68.604285
+sloc                                0.2975319        69.709925
+src_churn                          17.6325553        68.313545
+test_churn                         15.3665527        34.691740
+commits_on_files_touched            4.1702495        59.600796
+test_lines_per_kloc                 2.1917593        66.156183
+prev_pullreqs                       4.2439203        55.254109
+requester_succ_rate                11.3698544        49.825999
+main_team_member                    5.2541069         9.978539
+conflict                            0.0000000         0.000000
+forward_links                       1.6686504         1.414561
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 3
+
+        OOB estimate of  error rate: 52.78%
+Confusion matrix:
+     HOUR DAY REST class.error
+HOUR  184  58   79   0.4267913
+DAY   107  50  107   0.8106061
+REST   73  51  191   0.3936508
+                               HOUR         DAY       REST MeanDecreaseAccuracy
+team_size                 5.0676637  5.75228661  1.4518167             7.166792
+files_changed             5.9453653 -1.26731446  1.2302330             3.940421
+perc_external_contribs    4.6128116 -2.73840005  1.4850380             2.124353
+sloc                      3.8794218 -0.04697109  0.3685343             2.741432
+src_churn                 9.2769972  2.30921473  2.2719661             8.384347
+test_churn               15.0014711 -7.46616099  8.6805727            10.587250
+commits_on_files_touched  2.2636470 -3.96705168  4.7226647             2.262208
+test_lines_per_kloc       0.2386315 -1.18384995  3.4399941             1.548881
+prev_pullreqs             5.9914404  6.02581346  8.0474319            12.256440
+requester_succ_rate       5.5614315  3.01156610  6.2413957             9.365870
+main_team_member         11.6553421 -0.98216928 11.4580531            14.179725
+conflict                  0.0000000  0.00000000  0.0000000             0.000000
+forward_links             6.5672125  0.03050521  2.1940722             4.903517
+                         MeanDecreaseGini
+team_size                       60.209870
+files_changed                   38.290337
+perc_external_contribs          68.602256
+sloc                            70.885782
+src_churn                       62.332455
+test_churn                      32.963725
+commits_on_files_touched        57.337527
+test_lines_per_kloc             66.100653
+prev_pullreqs                   59.336962
+requester_succ_rate             49.770531
+main_team_member                14.142631
+conflict                         0.000000
+forward_links                    2.158787
+[1] "randomforest auc: 0.675043, acc: 0.510893"
+[1] "randomforest auc: 0.648829, acc: 0.523115"
+[1] "randomforest auc: 0.626316, acc: 0.472559"
+[1] "randomforest auc: 0.619271, acc: 0.472973"
+[1] "Running cross.val num_samples: 1000, run: 1"
+[1] "Running cross.val num_samples: 1000, run: 1"
+[1] "Running cross.val num_samples: 1000, run: 1"
+[1] "Running cross.val num_samples: 1000, run: 1"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 3
+
+        OOB estimate of  error rate: 51.67%
+Confusion matrix:
+     HOUR DAY REST class.error
+HOUR  164  61   68   0.4402730
+DAY    90  65  120   0.7636364
+REST   57  69  206   0.3795181
+                              HOUR         DAY      REST MeanDecreaseAccuracy
+team_size                 7.062617 -1.68009450  4.481653           6.20918288
+files_changed             1.390996 -3.39615184  1.156619          -0.23785315
+perc_external_contribs    4.416103 -1.18926756 -3.435484          -0.06853666
+sloc                     -2.876483 -0.12995670  4.394525           1.17929876
+src_churn                 8.996965 -4.36188174 14.299049          11.94205750
+test_churn               10.585329 -2.65951238  6.398219           8.57560313
+commits_on_files_touched  6.133591 -3.26699433  9.455541           7.62797165
+test_lines_per_kloc       2.187033  0.02290871  4.120242           3.69619495
+prev_pullreqs            16.771126 -4.74246325 11.618945          15.76844290
+requester_succ_rate       8.505036 -5.83396897 11.923632           9.62549223
+main_team_member          5.198951 -3.60175080 15.773276          13.06840946
+conflict                  0.000000  0.00000000  0.000000           0.00000000
+forward_links             2.594889  0.79367870  1.771114           2.78418864
+                         MeanDecreaseGini
+team_size                       60.968863
+files_changed                   35.553505
+perc_external_contribs          66.960910
+sloc                            70.479115
+src_churn                       65.435116
+test_churn                      33.546245
+commits_on_files_touched        62.465063
+test_lines_per_kloc             65.564204
+prev_pullreqs                   61.375036
+requester_succ_rate             48.126441
+main_team_member                14.259620
+conflict                         0.000000
+forward_links                    1.448817
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 3
+
+        OOB estimate of  error rate: 49.67%
+Confusion matrix:
+     HOUR DAY REST class.error
+HOUR  170  61   81   0.4551282
+DAY    84 107   87   0.6151079
+REST   57  77  176   0.4322581
+                              HOUR       DAY       REST MeanDecreaseAccuracy
+team_size                 6.613694  6.513341  3.3079313             9.999503
+files_changed             4.299033  5.518482  4.8201460             8.748577
+perc_external_contribs    1.149441  4.514751  1.6130067             4.023043
+sloc                      1.203410  1.476841  2.0754147             2.774697
+src_churn                 1.329364  1.994357 12.1219341             9.834837
+test_churn               15.101549  1.139368  5.6785703            13.144684
+commits_on_files_touched  1.246871  6.636569  1.2227667             5.105214
+test_lines_per_kloc       9.673627  6.219166  0.5514483            10.275015
+prev_pullreqs             6.391348  2.090994  5.7088807             8.632646
+requester_succ_rate      22.658820  6.539395  5.6137144            21.686624
+main_team_member          3.325168  0.889215  1.4826053             3.432629
+conflict                  0.000000  0.000000  0.0000000             0.000000
+forward_links             4.769241 -2.343926 -0.4663635             1.558268
+                         MeanDecreaseGini
+team_size                       62.789564
+files_changed                   37.817492
+perc_external_contribs          68.317093
+sloc                            70.502409
+src_churn                       63.925574
+test_churn                      34.916122
+commits_on_files_touched        59.148872
+test_lines_per_kloc             70.557081
+prev_pullreqs                   55.283211
+requester_succ_rate             53.399632
+main_team_member                 8.846545
+conflict                         0.000000
+forward_links                    1.314719
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 3
+
+        OOB estimate of  error rate: 51.78%
+Confusion matrix:
+     HOUR DAY REST class.error
+HOUR  187  46   75   0.3928571
+DAY    93  77  108   0.7230216
+REST   68  76  170   0.4585987
+                              HOUR        DAY       REST MeanDecreaseAccuracy
+team_size                12.143866  3.5520174[1] "randomforest auc: 0.620147, acc: 0.466610"
+  0.5508585            10.421937
+files_changed            14.118918  0.6744004  0.6172959             9.988143
+perc_external_contribs    1.841814  5.1631512 -0.6782593             3.521174
+sloc                      3.899981  3.1507872  5.9575487             7.788288
+src_churn                 9.496450  0.3749044 12.2145093            12.784332
+test_churn                7.693461  0.9191694  6.5908146             8.830567
+commits_on_files_touched  3.887529  1.3188587  3.9862678             5.434837
+test_lines_per_kloc       5.596379 -0.3511525  0.2378374             3.686447
+prev_pullreqs             8.019856 -0.4099099  5.1836471             8.228337
+requester_succ_rate      15.792605 -1.2094918  1.3091052             9.833967
+main_team_member         11.351833 -1.1085872 10.6508686            14.302428
+conflict                  0.000000  0.0000000  0.0000000             0.000000
+forward_links             1.939754  0.4810297  1.2412683             1.928619
+                         MeanDecreaseGini
+team_size                       61.803821
+files_changed                   38.550467
+perc_external_contribs          68.625621
+sloc                            72.976929
+src_churn                       60.894629
+test_churn                      33.853753
+commits_on_files_touched        60.585090
+test_lines_per_kloc             68.315229
+prev_pullreqs                   56.729582
+requester_succ_rate             49.751312
+main_team_member                12.195108
+conflict                         0.000000
+forward_links                    1.527462
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 3
+
+        OOB estimate of  error rate: 51.78%
+Confusion matrix:
+     HOUR DAY REST class.error
+HOUR  157  69   67   0.4641638
+DAY    93  92   98   0.6749117
+REST   61  78  185   0.4290123
+                               HOUR         DAY      REST MeanDecreaseAccuracy
+team_size                13.5744652 -0.73384566  4.606253           10.1226369
+files_changed             4.3017932  1.15979286  4.266905            6.0132518
+perc_external_contribs    0.3634369  0.73415334 -0.396502            0.5184133
+sloc                      6.0511554  3.46267170  8.285943           10.5515303
+src_churn                 1.7523496  3.42065179  1.129182            3.8268286
+test_churn                4.2355143 -0.07193593 11.672494           10.3220659
+commits_on_files_touched -2.2393445  5.11416617  2.406608            3.3453089
+test_lines_per_kloc       6.8027149  1.21520002  5.298009            7.8322635
+prev_pullreqs             3.0034386  3.86579097  4.074706            6.7793762
+requester_succ_rate      12.5431280 -0.34205673  3.628249            9.6698509
+main_team_member          7.4421925  4.24861278 11.447885           14.3392086
+conflict                  0.0000000  0.00000000  0.000000            0.0000000
+forward_links             5.9993054  5.46969222  5.526459            7.6321138
+                         MeanDecreaseGini
+team_size                       62.959821
+files_changed                   37.901826
+perc_external_contribs          67.566203
+sloc                            73.988074
+src_churn                       56.271423
+test_churn                      32.818580
+commits_on_files_touched        59.335144
+test_lines_per_kloc             71.012646
+prev_pullreqs                   54.949932
+requester_succ_rate             48.794905
+main_team_member                13.558398
+conflict                         0.000000
+forward_links                    2.621065
+[1] "randomforest auc: 0.604672, acc: 0.441511"
+[1] "randomforest auc: 0.658340, acc: 0.457714"
+[1] "randomforest auc: 0.607903, acc: 0.453120"
+[1] "Running cross.val num_samples: 1000, run: 1"
+[1] "Running cross.val num_samples: 1000, run: 1"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 3
+
+        OOB estimate of  error rate: 54.78%
+Confusion matrix:
+     HOUR DAY REST class.error
+HOUR  137  93   53   0.5159011
+DAY    88  98  117   0.6765677
+REST   59  83  172   0.4522293
+                               HOUR        DAY       REST MeanDecreaseAccuracy
+team_size                14.8026955 -3.4046010  3.8321963             9.081031
+files_changed             3.6524087  4.9733193  0.1405807             4.994028
+perc_external_contribs   -0.5427768  2.7872742  1.2148021             2.333527
+sloc                     10.0010230  1.7747524  7.3529718            10.705582
+src_churn                 5.0669831  0.0328081  4.7701139             5.594703
+test_churn                6.5997257 -0.9125103  2.1189890             4.656307
+commits_on_files_touched  3.7279811 -0.2632935 -1.3954762             1.255551
+test_lines_per_kloc       4.5102617 -0.1530407  2.3367860             3.938163
+prev_pullreqs             5.6904143  0.4766128  6.2777167             7.736628
+requester_succ_rate      12.3548552 -2.5139196  9.0459883            11.099405
+main_team_member         12.0170271 -1.0637914 10.7530372            13.480508
+conflict                  0.0000000  0.0000000  0.0000000             0.000000
+forward_links             5.3762299  2.9255078  2.9589953             5.531919
+                         MeanDecreaseGini
+team_size                       61.055141
+files_changed                   39.346193
+perc_external_contribs          72.064531
+sloc                            79.343423
+src_churn                       61.115147
+test_churn                      27.764637
+commits_on_files_touched        57.113968
+test_lines_per_kloc             64.794096
+prev_pullreqs                   57.238651
+requester_succ_rate             49.600637
+main_team_member                12.640472
+conflict                         0.000000
+forward_links                    2.939883
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 3
+
+        OOB estimate of  error rate: 53.89%
+Confusion matrix:
+     HOUR DAY REST class.error
+HOUR  165  72   70   0.4625407
+DAY    97  95   98   0.6724138
+REST   69  79  155   0.4884488
+                               HOUR        DAY        REST MeanDecreaseAccuracy
+team_size                 8.1029671  7.0743446  3.61708517            11.149700
+files_changed             2.3252684 -0.5827359  4.60817038             3.986283
+perc_external_contribs    5.6154727  3.4590175 -0.01710166             5.275897
+sloc                      0.3770406  3.3431474  2.78426635             3.751705
+src_churn                 5.2476670 -1.7621172  5.50559643             5.546685
+test_churn                9.8837799 -2.1934748  5.10173427             7.591185
+commits_on_files_touched  4.2175236 -1.2082803  3.71025788             4.242495
+test_lines_per_kloc       0.7265537  0.9598355  4.15373505             3.284045
+prev_pullreqs             9.8969752 -3.4880246 10.45590217            11.232971
+requester_succ_rate      15.6612263 -3.9721611  6.18192983            11.644830
+main_team_member          2.6006116 -4.2530119 16.54092365            11.460185
+conflict                  0.0000000  0.0000000  0.00000000             0.000000
+forward_links             1.5088195 -0.8622754  1.69390782             1.505918
+                         MeanDecreaseGini
+team_size                       65.390316
+files_changed                   37.712166
+perc_external_contribs          71.269467
+sloc                            72.872956
+src_churn                       57.121970
+test_churn                      33.909520
+commits_on_files_touched        57.735874
+test_lines_per_kloc             67.525947
+prev_pullreqs                   57.693309
+requester_succ_rate             50.137863
+main_team_member                12.391499
+conflict                         0.000000
+forward_links                    1.479578
+[1] "randomforest auc: 0.694104, acc: 0.550369"
+[1] "randomforest auc: 0.684165, acc: 0.493871"

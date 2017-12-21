@@ -1,0 +1,691 @@
+
+R version 3.3.2 (2016-10-31) -- "Sincere Pumpkin Patch"
+Copyright (C) 2016 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin14.5.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> # Clean up workspace
+> rm(list = ls(all = TRUE))
+> 
+> source(file = "R/merge-decision.R")
+> 
+> library(doMC)
+> registerDoMC(num.processes)
+> 
+> # Loading data files
+> all <- load.data_new()
+> #all <- load.some(dir=data.file.location, pattern="*.csv$", 10)
+> 
+> run.mergedecision.classifiers <- function(df, cases = c(1000, 10000,
++                                                         floor(nrow(df)/4),
++                                                         floor(nrow(df)/2),
++                                                         nrow(df)),
++                                           suffix = "")
++ {
++   for (i in cases)
++   {
++     cvResult <- cross.validation(merge.decision.model,
++                                  run.classifiers.mergedecision,
++                                  prepare.data.mergedecision, df, i, 10)
++ 
++     printf("Outputing Restuls")
++ 
++     write.csv(cvResult, file = sprintf("merge-decision-2-cv-%d%s.csv", i, suffix))
++     cross.validation.plot(cvResult,
++                           sprintf("Merge decision task cross validation (%d items)", i),
++                           sprintf("merge-decision-2-cv-%d%s.pdf", i, suffix))
++   }
++ }
+> 
+> run.mergedecision.classifiers(all)
+[1] "Running cross.val num_samples: 1000, run: 1"
+[1] "Prior propability: 0.868889"
+[1] "Training"
+[1] "Running cross.val num_samples: 1000, run: 1"
+[1] "Prior propability: 0.834444"
+[1] "Running cross.val num_samples: 1000, run: 1"
+[1] "Prior propability: 0.833333"
+[1] "Training"
+[1] "Training"
+[1] "Running cross.val num_samples: 1000, run: 1"
+[1] "Prior propability: 0.842222"
+[1] "Training"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+          Mean of squared residuals: 0.1105949
+                    % Var explained: 2.92
+                             %IncMSE IncNodePurity
+team_size                 4.84327061      8.631932
+num_commits              11.03663517      4.191259
+files_changed            10.12926516      4.054956
+perc_external_contribs    8.86201438     12.056723
+sloc                      0.29263776     10.205613
+src_churn                 8.32140814      6.927132
+test_churn                4.50600945      3.563223
+num_comments              1.67689549      4.844202
+commits_on_files_touched -0.03256506      6.352121
+test_lines_per_kloc      -1.35021609      9.240938
+prev_pullreqs            25.68274392      7.459003
+requester_succ_rate      28.12515792      8.548675
+main_team_member          5.41741660      2.305538
+conflict                  0.00000000      0.000000
+forward_links            11.40870779      1.816837
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+          Mean of squared residuals: 0.119455
+                    % Var explained: 13.53
+                           %IncMSE IncNodePurity
+team_size                 3.552553      8.233078
+num_commits              10.384319      5.075394
+files_changed             4.792020      5.619193
+perc_external_contribs    2.828949     10.794254
+sloc                     10.830111     13.645669
+src_churn                 9.284808      8.132298
+test_churn                5.600790      3.744322
+num_comments              5.305003      7.246724
+commits_on_files_touched  6.536645      8.296612
+test_lines_per_kloc       5.699302     11.548374
+prev_pullreqs            20.400327      7.930180
+requester_succ_rate      38.532875     15.075928
+main_team_member         11.437355      4.120531
+conflict                  0.000000      0.000000
+forward_links             7.623550      1.847089
+[1] "Predicting"
+[1] "Predictions"
+[1] "randomforest: AUC 0.751111, ACC 0.560000, PREC 0.956039, REC 0.533333"
+[1] "Predicting"
+[1] "Predictions"
+[1] "randomforest: AUC 0.837500, ACC 0.650000, PREC 0.952381, REC 0.600000"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+          Mean of squared residuals: 0.1306545
+                    % Var explained: 5.93
+                            %IncMSE IncNodePurity
+team_size                 3.6398909     10.257710
+num_commits               9.3667302      5.031484
+files_changed             5.3152831      5.335609
+perc_external_contribs    5.1066154     13.423792
+sloc                     -0.8608718     12.350064
+src_churn                 6.7353961      9.043110
+test_churn                3.6283133      3.692697
+num_comments             12.9062027      7.367508
+commits_on_files_touched  3.9878487      8.433624
+test_lines_per_kloc       3.8656223     10.887408
+prev_pullreqs            16.2564028      7.457256
+requester_succ_rate      24.1048274     11.566520
+main_team_member          3.3233603      3.853084
+conflict                  0.0000000      0.000000
+forward_links            16.7339537      3.623418
+[1] "Predicting"
+[1] "Predictions"
+[1] "randomforest: AUC 0.721761, ACC 0.620000, PREC 0.953463, REC 0.569767"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+          Mean of squared residuals: 0.1207063
+                    % Var explained: 9.16
+                           %IncMSE IncNodePurity
+team_size                 5.406081      9.633303
+num_commits              11.000356      4.023495
+files_changed             9.397047      5.185592
+perc_external_contribs    5.155474     12.769809
+sloc                      3.601648     12.033978
+src_churn                12.578421      8.932786
+test_churn               13.509622      4.006369
+num_comments             11.171467      5.903806
+commits_on_files_touched  8.673351      7.750955
+test_lines_per_kloc       7.795560     11.409131
+prev_pullreqs            17.325215      7.996532
+requester_succ_rate      29.251286     11.234680
+main_team_member         15.332942      3.407019
+conflict                  0.000000      0.000000
+forward_links             4.357412      1.345574
+[1] "Running cross.val num_samples: 1000, run: 1"
+[1] "Prior propability: 0.832222"
+[1] "Training"
+[1] "Running cross.val num_samples: 1000, run: 1"
+[1] "Prior propability: 0.840000"
+[1] "Training"
+[1] "Predicting"
+[1] "Predictions"
+[1] "randomforest: AUC 0.733593, ACC 0.620000, PREC 0.939388, REC 0.580247"
+[1] "Running cross.val num_samples: 1000, run: 1"
+[1] "Prior propability: 0.840000"
+[1] "Training"
+[1] "Running cross.val num_samples: 1000, run: 1"
+[1] "Prior propability: 0.848889"
+[1] "Training"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+          Mean of squared residuals: 0.1306888
+                    % Var explained: 2.76
+                            %IncMSE IncNodePurity
+team_size                -0.7456841      8.197895
+num_commits               6.5079598      3.792490
+files_changed             7.6962340      6.097185
+perc_external_contribs    4.6646252     13.116737
+sloc                      2.7529193     13.300683
+src_churn                 7.5901994      7.789265
+test_churn                3.2998443      2.931144
+num_comments              6.9352255      5.761170
+commits_on_files_touched  2.6459091      9.308361
+test_lines_per_kloc       0.4001982      9.644175
+prev_pullreqs            18.0155007      9.428956
+requester_succ_rate      35.7346230     13.698721
+main_team_member         10.2157584      1.790822
+conflict                  0.0000000      0.000000
+forward_links             6.8183715      2.092945
+[1] "Predicting"
+[1] "Predictions"
+[1] "randomforest: AUC 0.794510, ACC 0.590000, PREC 0.941176, REC 0.552941"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+          Mean of squared residuals: 0.1195364
+                    % Var explained: 14.39
+                           %IncMSE IncNodePurity
+team_size                 2.263491      9.287920
+num_commits              10.857466      4.870109
+files_changed             5.663778      4.840278
+perc_external_contribs    3.976406     13.857213
+sloc                      6.776123     12.037314
+src_churn                 6.557599      7.655253
+test_churn               11.995718      4.696710
+num_comments              7.567156      5.594026
+commits_on_files_touched  4.697348      8.132157
+test_lines_per_kloc       4.771960      9.926358
+prev_pullreqs            21.436132      8.470916
+requester_succ_rate      31.548829     15.268379
+main_team_member          9.079854      3.549336
+conflict                  0.000000      0.000000
+forward_links            25.538045      4.444520
+[1] "Predicting"
+[1] "Predictions"
+[1] "randomforest: AUC 0.792398, ACC 0.635000, PREC 0.920000, REC 0.586420"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+          Mean of squared residuals: 0.1283787
+                    % Var explained: 4.48
+                            %IncMSE IncNodePurity
+team_size                -0.7258398      9.001691
+num_commits               7.8930084      4.290542
+files_changed            10.1339975      5.554677
+perc_external_contribs    6.2210106     13.983748
+sloc                      6.2214199     13.896574
+src_churn                10.2205179      9.191186
+test_churn                5.3937159      3.567050
+num_comments              8.6624006      6.332104
+commits_on_files_touched -0.9740367      7.142913
+test_lines_per_kloc       1.3540145     10.320974
+prev_pullreqs            20.7569609      7.291900
+requester_succ_rate      24.6473668     12.211333
+main_team_member          8.0983116      2.382790
+conflict                  0.0000000      0.000000
+forward_links             6.4748416      1.537689
+[1] "Predicting"
+[1] "Predictions"
+[1] "randomforest: AUC 0.808266, ACC 0.620000, PREC 0.935133, REC 0.573171"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+          Mean of squared residuals: 0.1154656
+                    % Var explained: 9.99
+                           %IncMSE IncNodePurity
+team_size                 3.867188      8.758591
+num_commits               3.251065      3.353401
+files_changed             5.170720      4.133848
+perc_external_contribs    8.544659     12.546338
+sloc                      2.870458     10.684518
+src_churn                 5.556270      7.645680
+test_churn                5.500678      4.109859
+num_comments              3.102082      5.123881
+commits_on_files_touched  2.613689      7.465874
+test_lines_per_kloc       2.354884     10.580064
+prev_pullreqs            17.599343      8.332050
+requester_succ_rate      32.950828     14.199566
+main_team_member          9.967554      3.812281
+conflict                  0.000000      0.000000
+forward_links            13.698082      2.337382
+[1] "Predicting"
+[1] "Predictions"
+[1] "randomforest: AUC 0.822745, ACC 0.595000, PREC 0.953488, REC 0.558824"
+[1] "Running cross.val num_samples: 1000, run: 1"
+[1] "Prior propability: 0.846667"
+[1] "Training"
+[1] "Running cross.val num_samples: 1000, run: 1"
+[1] "Prior propability: 0.826667"
+[1] "Training"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+          Mean of squared residuals: 0.1272538
+                    % Var explained: 11.19
+                             %IncMSE IncNodePurity
+team_size                -0.06705224     10.002929
+num_commits               6.40033801      4.055356
+files_changed             3.16098367      4.615508
+perc_external_contribs   -0.11689986     11.402158
+sloc                      3.25606632     11.926011
+src_churn                12.24029090     10.763140
+test_churn                4.94755588      4.415960
+num_comments             11.04914354      7.604901
+commits_on_files_touched  4.81076090      8.980876
+test_lines_per_kloc       2.75395090     11.007048
+prev_pullreqs            26.97994692      9.504069
+requester_succ_rate      36.07691860     15.022403
+main_team_member          6.46020112      2.967293
+conflict                  0.00000000      0.000000
+forward_links            15.69168233      3.081079
+[1] "Predicting"
+[1] "Predictions"
+[1] "randomforest: AUC 0.717902, ACC 0.590000, PREC 0.870899, REC 0.556962"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+          Mean of squared residuals: 0.1233292
+                    % Var explained: 5
+                            %IncMSE IncNodePurity
+team_size                 1.6561181      9.096754
+num_commits               6.0083256      4.369102
+files_changed             7.2946904      5.605554
+perc_external_contribs   -1.0108874     11.185359
+sloc                      8.6837941     14.258389
+src_churn                 5.2856824      7.602261
+test_churn                1.5897409      3.374341
+num_comments              6.6853756      5.179700
+commits_on_files_touched -0.6573669      7.147477
+test_lines_per_kloc       0.5340753      9.434371
+prev_pullreqs            18.5290525      7.938163
+requester_succ_rate      29.3177170     13.407303
+main_team_member          8.9683518      3.548757
+conflict                  0.0000000      0.000000
+forward_links             4.0853510      1.678385
+[1] "Predicting"
+[1] "Predictions"
+[1] "randomforest: AUC 0.661960, ACC 0.560000, PREC 0.909091, REC 0.534884"
+[1] "Finished Loop, converting restuls"
+[1] "return restuls"
+[1] "Outputing Restuls"
+[1] "Running cross.val num_samples: 10000, run: 1"
+[1] "Prior propability: 0.852778"
+[1] "Training"
+[1] "Running cross.val num_samples: 10000, run: 1"
+[1] "Prior propability: 0.847556"
+[1] "Running cross.val num_samples: 10000, run: 1"
+[1] "Training"
+[1] "Prior propability: 0.850111"
+[1] "Training"
+[1] "Running cross.val num_samples: 10000, run: 1"
+[1] "Prior propability: 0.851222"
+[1] "Training"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+          Mean of squared residuals: 0.1101181
+                    % Var explained: 13.58
+                           %IncMSE IncNodePurity
+team_size                17.765803      88.99532
+num_commits              28.322483      37.58640
+files_changed            21.236668      47.20031
+perc_external_contribs   18.016820     118.57387
+sloc                     19.420127     122.59973
+src_churn                28.704793      81.56252
+test_churn               16.892341      34.34438
+num_comments             31.867251      54.45730
+commits_on_files_touched 19.701832      80.66278
+test_lines_per_kloc      17.362225     106.93802
+prev_pullreqs            61.935173      70.58862
+requester_succ_rate      67.943985     122.82519
+main_team_member          9.098844      32.72626
+conflict                  0.000000       0.00000
+forward_links            57.141300      22.12686
+[1] "Predicting"
+[1] "Predictions"
+[1] "randomforest: AUC 0.778595, ACC 0.622500, PREC 0.949698, REC 0.579356"
+[1] "Running cross.val num_samples: 10000, run: 1"
+[1] "Prior propability: 0.846444"
+[1] "Training"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+          Mean of squared residuals: 0.1103391
+                    % Var explained: 14.6
+                           %IncMSE IncNodePurity
+team_size                21.516937      91.17445
+num_commits              26.654812      38.37110
+files_changed            29.931311      48.82174
+perc_external_contribs   14.786747     117.82918
+sloc                     22.152578     120.20514
+src_churn                31.216139      82.63915
+test_churn               13.395019      32.99985
+num_comments             28.196029      57.69444
+commits_on_files_touched 10.927359      75.94193
+test_lines_per_kloc      16.238477     109.60397
+prev_pullreqs            64.076888      69.77546
+requester_succ_rate      73.252799     134.92400
+main_team_member          8.143663      34.13646
+conflict                  0.000000       0.00000
+forward_links            47.019938      25.41119
+[1] "Predicting"
+[1] "Predictions"
+[1] "randomforest: AUC 0.810466, ACC 0.604000, PREC 0.967339, REC 0.565367"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+          Mean of squared residuals: 0.1071651
+                    % Var explained: 15.38
+                          %IncMSE IncNodePurity
+team_size                13.22064      86.69276
+num_commits              26.68762      39.49366
+files_changed            30.62562      53.52547
+perc_external_contribs   23.02872     116.78618
+sloc                     20.61607     118.69968
+src_churn                37.26094      82.94528
+test_churn               20.34995      34.90793
+num_comments             30.07599      53.50970
+commits_on_files_touched 17.64581      75.52680
+test_lines_per_kloc      11.26995     100.15138
+prev_pullreqs            59.29787      68.72038
+requester_succ_rate      65.03545     121.65838
+main_team_member         22.66948      39.98237
+conflict                  0.00000       0.00000
+forward_links            47.88503      24.89725
+[1] "Predicting"
+[1] "Predictions"
+[1] "Running cross.val num_samples: 10000, run: 1"
+[1] "Prior propability: 0.853222"
+[1] "Training"
+[1] "randomforest: AUC 0.789084, ACC 0.619500, PREC 0.945607, REC 0.576464"
+[1] "Running cross.val num_samples: 10000, run: 1"
+[1] "Prior propability: 0.846000"
+[1] "Training"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+          Mean of squared residuals: 0.1079866
+                    % Var explained: 13.99
+                           %IncMSE IncNodePurity
+team_size                22.570165      89.76205
+num_commits              30.726660      37.67258
+files_changed            29.276136      48.28917
+perc_external_contribs   17.439414     119.27469
+sloc                     25.557921     122.47344
+src_churn                31.552086      80.42378
+test_churn               22.873057      35.67154
+num_comments             28.877127      51.78686
+commits_on_files_touched  9.252247      78.28365
+test_lines_per_kloc      16.905164     105.04664
+prev_pullreqs            48.839086      68.30578
+requester_succ_rate      48.544754     116.33810
+main_team_member         20.562592      37.52364
+conflict                  0.000000       0.00000
+forward_links            42.601855      16.66951
+[1] "Predicting"
+[1] "Predictions"
+[1] "randomforest: AUC 0.800248, ACC 0.618000, PREC 0.957240, REC 0.574970"
+[1] "Running cross.val num_samples: 10000, run: 1"
+[1] "Prior propability: 0.840889"
+[1] "Training"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+          Mean of squared residuals: 0.1123679
+                    % Var explained: 13.55
+                          %IncMSE IncNodePurity
+team_size                21.62030      90.25048
+num_commits              33.32138      40.92213
+files_changed            28.31018      51.48140
+perc_external_contribs   23.01159     124.16083
+sloc                     25.82124     129.67004
+src_churn                33.25470      86.23086
+test_churn               20.77618      35.74108
+num_comments             34.27712      55.62535
+commits_on_files_touched 14.41429      81.24540
+test_lines_per_kloc      20.69773     108.92177
+prev_pullreqs            53.16409      68.40858
+requester_succ_rate      52.40099     115.30274
+main_team_member         10.61390      30.96781
+conflict                  0.00000       0.00000
+forward_links            57.07739      24.88416
+[1] "Predicting"
+[1] "Predictions"
+[1] "randomforest: AUC 0.745353, ACC 0.590000, PREC 0.927435, REC 0.554762"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+          Mean of squared residuals: 0.1079077
+                    % Var explained: 13.84
+                           %IncMSE IncNodePurity
+team_size                15.799369      88.63931
+num_commits              27.681125      38.40822
+files_changed            23.310538      47.02501
+perc_external_contribs   19.796690     119.62643
+sloc                     19.679822     122.43166
+src_churn                33.886972      81.91738
+test_churn               17.181848      32.47176
+num_comments             32.424492      55.26210
+commits_on_files_touched 10.811996      76.27739
+test_lines_per_kloc      19.619645     107.85599
+prev_pullreqs            59.907700      70.74180
+requester_succ_rate      58.649547     114.79444
+main_team_member          8.756381      32.29602
+conflict                  0.000000       0.00000
+forward_links            39.416679      17.29724
+[1] "Predicting"
+[1] "Predictions"
+[1] "randomforest: AUC 0.801544, ACC 0.611000, PREC 0.954163, REC 0.569249"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+          Mean of squared residuals: 0.115794
+                    % Var explained: 13.45
+                          %IncMSE IncNodePurity
+team_size                18.90168      94.95350
+num_commits              33.56772      41.44171
+files_changed            28.30835      53.97325
+perc_external_contribs   15.41543     123.12848
+sloc                     26.13975     131.28974
+src_churn                29.27816      84.65768
+test_churn               18.51688      36.42878
+num_comments             26.36607      57.33731
+commits_on_files_touched 17.79103      82.56916
+test_lines_per_kloc      18.04016     113.89852
+prev_pullreqs            50.68609      73.13086
+requester_succ_rate      64.87404     122.88519
+main_team_member         16.06616      34.63988
+conflict                  0.00000       0.00000
+forward_links            49.76816      23.75765
+[1] "Predicting"
+[1] "Predictions"
+[1] "randomforest: AUC 0.757480, ACC 0.599000, PREC 0.948155, REC 0.561916"
+[1] "Running cross.val num_samples: 10000, run: 1"
+[1] "Prior propability: 0.850778"
+[1] "Training"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+          Mean of squared residuals: 0.1133637
+                    % Var explained: 12.99
+                           %IncMSE IncNodePurity
+team_size                16.130673      90.88341
+num_commits              28.006759      38.32841
+files_changed            29.624592      51.90192
+perc_external_contribs   15.232179     124.00006
+sloc                     18.484709     124.13211
+src_churn                29.419270      82.15137
+test_churn               21.063985      36.44341
+num_comments             34.407554      56.19911
+commits_on_files_touched 15.943873      79.99338
+test_lines_per_kloc      12.024519     110.67240
+prev_pullreqs            62.131324      70.99168
+requester_succ_rate      71.051804     126.69770
+main_team_member          6.024425      30.06675
+conflict                  0.000000       0.00000
+forward_links            43.425077      21.30244
+[1] "Predicting"
+[1] "Predictions"
+[1] "randomforest: AUC 0.802378, ACC 0.614000, PREC 0.954769, REC 0.574443"
+[1] "Running cross.val num_samples: 10000, run: 1"
+[1] "Prior propability: 0.849111"
+[1] "Training"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+          Mean of squared residuals: 0.1100363
+                    % Var explained: 13.33
+                           %IncMSE IncNodePurity
+team_size                13.615194      86.09993
+num_commits              31.043468      40.02860
+files_changed            30.169371      50.48243
+perc_external_contribs   19.977565     118.90049
+sloc                     17.989042     123.81784
+src_churn                29.156323      82.26295
+test_churn               18.010369      35.65840
+num_comments             30.766710      55.53487
+commits_on_files_touched  9.515737      78.25316
+test_lines_per_kloc      15.926853     106.39709
+prev_pullreqs            48.131650      66.93345
+requester_succ_rate      59.481640     117.21666
+main_team_member         24.288391      36.36601
+conflict                  0.000000       0.00000
+forward_links            45.157999      20.84864
+[1] "Predicting"
+[1] "Predictions"
+[1] "randomforest: AUC 0.775958, ACC 0.608500, PREC 0.938776, REC 0.568616"
+
+Call:
+ randomForest(formula = model, data = train.set, importance = TRUE) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 5
+
+          Mean of squared residuals: 0.1099191
+                    % Var explained: 14.21
+                          %IncMSE IncNodePurity
+team_size                15.26639      87.69139
+num_commits              34.97347      43.66507
+files_changed            25.38490      49.14221
+perc_external_contribs   15.36593     117.63779
+sloc                     22.34077     120.46222
+src_churn                35.38094      85.78673
+test_churn               25.88948      40.64711
+num_comments             35.05227      56.24054
+commits_on_files_touched 13.18015      76.88931
+test_lines_per_kloc      19.10077     105.69713
+prev_pullreqs            66.72529      71.56132
+requester_succ_rate      68.54608     120.15412
+main_team_member         18.07002      39.39420
+conflict                  0.00000       0.00000
+forward_links            36.75083      15.83234
+[1] "Predicting"
+[1] "Predictions"
+[1] "randomforest: AUC 0.716807, ACC 0.584500, PREC 0.929119, REC 0.554577"
+[1] "Finished Loop, converting restuls"
+[1] "return restuls"
+[1] "Outputing Restuls"
+[1] "Running cross.val num_samples: 229016, run: 1"
+[1] "Running cross.val num_samples: 229016, run: 1"
+[1] "Running cross.val num_samples: 229016, run: 1"
+[1] "Running cross.val num_samples: 229016, run: 1"
+[1] "Prior propability: 0.847652"
+[1] "Training"
+[1] "Prior propability: 0.848550"
+[1] "Training"
+[1] "Prior propability: 0.848404"
+[1] "Training"
+[1] "Prior propability: 0.848574"
+[1] "Training"

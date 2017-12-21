@@ -27,6 +27,9 @@ tmp
 .DS_Store
 *.swp
 doc/build
+.ipynb_checkpoints/*
+__temp__.*
+.Rproj.user
 .Rproj.user
 cache
 data/*.err

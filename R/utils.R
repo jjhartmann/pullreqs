@@ -32,6 +32,7 @@ load.data <- function(projects.file = "projects.txt") {
   subset(all, !is.na(src_churn))
 }
 
+<<<<<<< HEAD
 # Determine which files to load and return a list of paths
 which.to.load <- function(dir = ".", pattern = "*.csv$",
                           projects.file = "projects.txt") {
@@ -45,6 +46,24 @@ which.to.load <- function(dir = ".", pattern = "*.csv$",
   } else {
     list.files(path = dir, pattern = pattern, full.names = T)
   }
+=======
+# Load New data
+load.data_new <- function() {
+  read.csv("../data-new.csv")
+}
+
+# Load all csv files in the provided dir as data frames
+load.all <- function(dir = ".", pattern = "*.csv$") {
+  lapply(list.files(path = dir, pattern = pattern, full.names = T),
+         function(x){
+           print(sprintf("Reading file %s", x))
+           a <- load.filter(x)
+           if (nrow(a) == 0) {
+            printf("Warning - No rows in file %s", x)
+           }
+           a
+         })
+>>>>>>> replication
 }
 
 # Load all files matching the pattern as a single dataframe
@@ -113,6 +132,7 @@ load.some <- function(dir = ".", pattern = "*.csv$", howmany = -1) {
 }
 
 load.filter <- function(path) {
+<<<<<<< HEAD
   setAs("character", "POSIXct",
         function(from){as.POSIXct(from, origin = "1970-01-01")})
 
@@ -204,6 +224,40 @@ load.filter <- function(path) {
 #   # line has wrong fields
   a <- subset(a, !is.na(first_response))
   data.table(a)
+=======
+  setAs("character", "POSIXct", function(from){as.POSIXct(from, origin = "1970-01-01")})
+  a <- read.csv(path, check.names = T,
+                colClasses = c("integer",rep("factor",3), rep("integer", 5),
+                               rep("factor", 3), rep("integer", 9),
+                               rep("double", 3), "integer",  "factor",
+                               "integer", "double", "integer",
+                               "factor", "factor"))
+
+  a$conflict <- a$conflict == "true"
+  a$conflict <- as.factor(a$conflict)
+  a$forward_links <- a$forward_links == "true"
+  a$forward_links <- as.factor(a$forward_links)
+  a$main_team_member <- a$main_team_member == "true"
+  a$main_team_member <- as.factor(a$main_team_member)
+  a$intra_branch <- a$intra_branch == "true"
+  a$intra_branch <- as.factor(a$intra_branch)
+  # Take care of cases where csv file production was interupted, so the last
+  # line has wrong fields
+  a <- subset(a, !is.na(intra_branch))
+  a
+}
+
+# Add merged column
+addcol.merged <- function(dfs) {
+  lapply(dfs, addcol.merged.df)
+}
+
+addcol.merged.df <- function(x) {
+  print(sprintf("Adding column merged to dataframe %s", (project.name(x))))
+  x$merged <- !is.na(x$merged_at)
+  x$merged <- as.factor(x$merged)
+  x
+>>>>>>> replication
 }
 
 # Name of a project in a dataframe
@@ -241,8 +295,8 @@ column.contains.na <- function(df) {
 ranksum <- function (a, b, title = "") {
   w <- wilcox.test(a, b)
   d <- cliffs.d(a, b)
-  printf("%s sizes: a: %d b: %d, medians a: %f b: %f, means a: %f, b: %f, wilcox: %f, p: %f, d: %f", 
-         title, length(a), length(b), median(a), median(b), mean(a), mean(b), w$statistic, 
+  printf("%s sizes: a: %d b: %d, medians a: %f b: %f, means a: %f, b: %f, wilcox: %f, p: %f, d: %f",
+         title, length(a), length(b), median(a), median(b), mean(a), mean(b), w$statistic,
          w$p.value, d)
 }
 
@@ -264,6 +318,7 @@ store.pdf <- function(data, where, name)
   plot(data)
   dev.off()
 }
+<<<<<<< HEAD
 
 # Get the owner part form a "owner/repo" repository naming
 owner <- function(repo.name) {
@@ -286,3 +341,5 @@ remove.outliers <- function(x) {
   threshold <- outlier.threshold(x)
   Filter(function(y){ y < threshold}, x)
 }
+=======
+>>>>>>> replication

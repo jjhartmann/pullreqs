@@ -22,18 +22,18 @@ con <- dbConnect(dbDriver("MySQL"), user = mysql.user, password = mysql.passwd,
                  dbname = mysql.db, host = mysql.host)
 
 # Overall project statistics
-# if (file.exists(overall.dataset.stats)) {
-#   print(sprintf("%s file found", overall.dataset.stats))
-#   projectstats <- read.csv(file = overall.dataset.stats)
-# } else {
-#   print(sprintf("File not found %s", overall.dataset.stats))
-#   print("Running project stats query, this will take long...")
-#   # This will take a LONG time. Think >0.5 hours.
-#   res <- dbSendQuery(con, "select concat(u.login, '/', p.name) as name, (select count(*) from commits c, project_commits pc    where pc.project_id = p.id and pc.commit_id = c.id) as commits, (select count(*) from watchers where repo_id = p.id) as watchers, (select count(*) from pull_requests where base_repo_id = p.id)   as pull_requests, (select count(*) from issues where repo_id = p.id) as issues, (select count(*)    from project_members where repo_id = p.id) as project_members, (select count(distinct c.author_id)  from commits c, project_commits pc where pc.project_id = p.id and pc.commit_id = c.id) as contributors, (select count(*) from projects p1 where p1.forked_from = p.id) as forks, (select count(*) from issue_comments ic, issues i where ic.issue_id=i.id and i.repo_id = p.id) as issue_comments, (select count(*) from pull_requests pr, pull_request_comments prc where pr.base_repo_id=p.id and prc.pull_request_id = pr.id) as pull_req_comments, p.language from projects  p, users u where p.forked_from is null and p.deleted is false and u.id = p.owner_id group by p.id;")
-#   projectstats <- fetch(res, n = -1)
-#   write.csv(projectstats, file = overall.dataset.stats)
-#   projectstats
-# }
+if (file.exists(overall.dataset.stats)) {
+  print(sprintf("%s file found", overall.dataset.stats))
+  projectstats <- read.csv(file = overall.dataset.stats)
+} else {
+  print(sprintf("File not found %s", overall.dataset.stats))
+  print("Running project stats query, this will take long...")
+  # This will take a LONG time. Think >0.5 hours.
+  res <- dbSendQuery(con, "select concat(u.login, '/', p.name) as name, (select count(*) from commits c, project_commits pc    where pc.project_id = p.id and pc.commit_id = c.id) as commits, (select count(*) from watchers where repo_id = p.id) as watchers, (select count(*) from pull_requests where base_repo_id = p.id)   as pull_requests, (select count(*) from issues where repo_id = p.id) as issues, (select count(*)    from project_members where repo_id = p.id) as project_members, (select count(distinct c.author_id)  from commits c, project_commits pc where pc.project_id = p.id and pc.commit_id = c.id) as contributors, (select count(*) from projects p1 where p1.forked_from = p.id) as forks, (select count(*) from issue_comments ic, issues i where ic.issue_id=i.id and i.repo_id = p.id) as issue_comments, (select count(*) from pull_requests pr, pull_request_comments prc where pr.base_repo_id=p.id and prc.pull_request_id = pr.id) as pull_req_comments, p.language from projects  p, users u where p.forked_from is null and p.deleted is false and u.id = p.owner_id group by p.id;")
+  projectstats <- fetch(res, n = -1)
+  write.csv(projectstats, file = overall.dataset.stats)
+  projectstats
+}
 
 # Total repos
 res <- dbSendQuery(con, "select count(*) as cnt from projects")
@@ -107,6 +107,7 @@ pullreqs <- fetch(res, n = -1)
 print(sprintf("Total pull requests: %d",pullreqs$cnt))
 
 # % of pull req comments by non-repo members
+<<<<<<< HEAD
 q <- "select count(pr.id) as cnt
   from pull_requests pr, pull_request_comments prc
   where pr.id = prc.pull_request_id
@@ -117,6 +118,9 @@ q <- "select count(pr.id) as cnt
         and pc.project_id = pr.base_repo_id
         and c.author_id = prc.user_id);"
 res <- dbSendQuery(con, unwrap(q))
+=======
+res <- dbSendQuery(con, "select count(pr.id) as cnt from pull_requests pr, pull_request_comments prc where pr.id = prc.pull_request_id and not exists (select * from project_commits pc, commits c where pc.commit_id = c.id and pc.project_id = pr.base_repo_id and c.author_id = prc.user_id);")
+>>>>>>> replication
 prc_non_members <- fetch(res, n = -1)
 print(sprintf("Pull request comments by non project members: %f", prc_non_members$cnt))
 #
@@ -170,6 +174,7 @@ print(sprintf("Repos with > 1 committers and 0 pull reqs in 2013: %d", repos_wit
 ## Pull req usage comparison 2012 -- 2013
 
 # Original repositories that have > 1 committers in Feb - Aug 2012
+<<<<<<< HEAD
 q <- "select count(*) as cnt
       from projects p
       where forked_from is null
@@ -186,6 +191,9 @@ q <- "select count(*) as cnt
             and unix_timestamp(c.created_at) between 1328054400 and 1346457600) > 1
         and not exists (select * from pull_requests pr where p.id = pr.base_repo_id)"
 res <- dbSendQuery(con, unwrap(q))
+=======
+res <- dbSendQuery(con, "select count(*) as cnt from projects p where forked_from is null and deleted is false and name not regexp '^.*\\.github\\.com$' and name <> 'try_git' and name <> 'dotfiles' and name <> 'vimfiles' and (select count(distinct c.author_id) from project_commits pc, commits c where  pc.project_id = p.id and  c.id = pc.commit_id and unix_timestamp(c.created_at) between 1328054400 and 1346457600) > 1 and not exists (select * from pull_requests pr where p.id = pr.base_repo_id)")
+>>>>>>> replication
 repos_with_commits_2012 <- fetch(res, n = -1)
 print(sprintf("Original repos with commits in Feb - Aug 2012: %f", repos_with_commits_2012$cnt))
 
@@ -255,7 +263,11 @@ store.pdf(ggplot(pullreqs_per_month, aes(x = cdate)) +
    theme(legend.title=element_blank()),
       plot.location,"num-pullreqs-month.pdf")
 
+<<<<<<< HEAD
 pullreqs_per_month <- melt(pullreqs_per_month, id.vars = "cdate")
+=======
+pullreqs_per_month <- melt(pullreqs_per_month)
+>>>>>>> replication
 
 store.pdf(ggplot(pullreqs_per_month, aes(x = cdate, y = value, fill = variable)) +
   scale_x_datetime() +
@@ -441,4 +453,3 @@ print.xtable(table, file = paste(latex.location, "overall-stats.tex", sep = "/")
              floating.environment = "table*",
              include.rownames = F, size = c(-1),
              sanitize.text.function = function(str)gsub("_","\\_",str,fixed=TRUE))
-

@@ -82,6 +82,62 @@ used <- subset(all, select=columns)
 cor.test(all$test_lines_per_kloc, all$test_cases_per_kloc, method="spearman")
 cor.test(all$test_lines_per_kloc, all$asserts_per_kloc, method="spearman")
 
+<<<<<<< HEAD
+=======
+## Cross correlation matrix accross all model variables
+ctab <- cor(used, method = "spearman", use='complete.obs')
+colorfun <- colorRamp(c("#ff0000","white","#3366CC"), space="Lab")
+store.pdf(plotcorr(ctab,
+                   #col = 'grey',
+                   col=rgb(colorfun((ctab+1)/2), maxColorValue=255),
+                   outline = FALSE),
+          plot.location,
+          "cross-cor.pdf")
+print(xtable(ctab,
+             caption="Cross correlation matrix (Spearman) between examined factors",
+             label="tab:crosscor"),
+         type = "latex",
+         size = "small",
+         file = paste(latex.location, "cross-cor.tex", "/"))
+
+ctab.m <- melt(ctab)
+p <- ggplot(ctab.m, aes(X1, X2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(space = "Lab") +
+  theme(axis.title = element_blank(),
+        axis.text = element_text(size = 11),
+        axis.text.x = element_text(angle = -90, hjust = 0, vjust = 0.5))
+store.pdf(p, plot.location, "cross-cor-heat.pdf")
+
+# Percentage of merged vs unmerged pull requests accross projects
+a <- all
+merged.perc <- sqldf("select project_name, (select count(*) from a a1 where a1.project_name = a.project_name and merged = 'TRUE') *1.0/ (select count(*) from a a1 where a1.project_name = a.project_name) as ratio_merged from a group by project_name order by ratio_merged")
+merged.perc$order = as.numeric(rownames(merged.perc))
+p <- ggplot(merged.perc, aes(x = order, y = ratio_merged)) +
+  geom_bar(stat="identity", color = "#ff3333") +
+  theme(axis.text.x=element_blank()) +
+  ylab("Percentage") +
+  xlab("Project")
+store.pdf(p, plot.location, 'perc-merged.pdf')
+
+# This is to check very low scores in merge % is due to the lack
+# of data as a result of the project not having an activated issue tracker
+# check.has.bugs(df, credentials = "username:password") {
+#   has.bugs <- function(x) {
+#     library(RCurl)
+#     printf("Checking %s", x)
+#     h = basicHeaderGatherer()
+#     getURI(sprintf("https://api.github.com/repos/%s/issues", x),
+#            userpwd=credentials,  httpauth = 1L, headerfunction = h$update)
+#     h$value()['status'] == 200
+#   }
+#   df$has_bugs <- lapply(df$project_name, has_bugs)
+# }
+#
+# check.has.bugs(merged.perc)
+rm(a)
+
+>>>>>>> replication
 # Time to merge pull request box plots histogram
 p <- ggplot(merged, aes(x = mergetime_minutes)) +
   geom_histogram() + scale_x_log10(labels=comma) +
@@ -111,6 +167,61 @@ p <- ggplot(all, aes(x = num_comments)) +
   ylab("Number of pull requests")
 store.pdf(p, plot.location, "pr-num-comments-hist.pdf")
 
+<<<<<<< HEAD
+=======
+### Dataset descriptive statistics
+descr.stats <- data.frame(
+  Feature = c('num_commits', 'src_churn', 'test_churn', 'files_changed',
+              'num_comments', 'sloc', 'team_size',
+              'perc_external_contribs', 'commits_on_files_touched',
+              'test_lines_per_kloc', 'prev_pullreqs', 'requester_succ_rate'),
+  Description = c(
+    "Number of commits in the pull request",
+    "Number of lines changed (added + deleted) by the pull request.",
+    "Number of test lines changed in the pull request.",
+    "Number of files touched by the pull request.",
+    "The total number of comments (discussion and code review).",
+    # "Number of participants in the pull request discussion",
+    #"The word conflict appears in the pull request comments.",
+    #"The pull request comments include links to other pull requests.",
+    "Executable lines of code at pull request merge time.",
+    "Number of active core team members during the last 3 months prior the pull request creation.",
+    "The ratio of commits from external members over core team members in the last 3 months prior to pull request creation.",
+    "Number of total commits on files touched by the pull request 3 months before the pull request creation time.",
+    "A proxy for the project's test coverage.",
+    "Number of pull requests submitted by a specific developer, prior to the examined pull request.",
+    "The percentage of the developer's pull requests that have been merged up to the creation of the examined pull request."
+    #"Whether the developer belongs to the main repository team."
+  )
+)
+
+descr.stats$Feature <- as.character(descr.stats$Feature)
+descr.stats$quant_5 <- lapply(descr.stats$Feature, function(x){quantile(all[,x], 0.05,na.rm = T)})
+descr.stats$mean <- lapply(descr.stats$Feature, function(x){mean(all[,x], na.rm = T)})
+descr.stats$median <- lapply(descr.stats$Feature, function(x){median(all[,x], na.rm = T)})
+descr.stats$quant_95 <- lapply(descr.stats$Feature, function(x){quantile(all[,x], 0.95, na.rm = T)})
+descr.stats$histogram <- lapply(descr.stats$Feature, function(x){
+  data <- all[, x]
+  unq <- digest(sprintf("descr.stats.%s",as.character(x)))
+  fname <- paste(plot.location, sprintf("hist-%s.pdf",unq), sep="/")
+  par(mar=c(0,0,0,0))
+  plot.window(c(0,1),c(0,1),  xaxs='i', yaxs='i')
+  pdf(file = fname , width = 6, height = 3)
+  hist(log(data), probability = TRUE, col = "red", border = "white",
+       breaks = 10, xlab = "", ylab = "", axes = F, main = NULL)
+  dev.off()
+  sprintf("\\includegraphics[scale = 0.1, clip = true, trim= 50px 60px 50px 60px]{hist-%s.pdf}", unq)
+})
+
+table <- xtable(descr.stats, label="tab:features",
+                caption="Selected features and descriptive statistics. Historgrams are in log scale.",
+                align = c("l","r","p{15em}", rep("c", 5)))
+print.xtable(table, file = paste(latex.location, "feature-stats.tex", sep = "/"),
+             floating.environment = "table*",
+             include.rownames = F, size = c(-2),
+             sanitize.text.function = function(str)gsub("_","\\_",str,fixed=TRUE))
+
+>>>>>>> replication
 # Merge % overall
 printf("Avg pullreq merged: %f", (nrow(merged)/nrow(all))*100)
 
@@ -171,8 +282,8 @@ p <- ggplot(teams, aes(x = team, y = mergetime_minutes)) +
 store.pdf(p, plot.location, "merge-internal-external.pdf")
 
 # Rank correlation to see whether the populations differ significantly
-ranksum(subset(merged, main_team_member == T)$mergetime_minutes, 
-        subset(merged, main_team_member == F)$mergetime_minutes, 
+ranksum(subset(merged, main_team_member == T)$mergetime_minutes,
+        subset(merged, main_team_member == F)$mergetime_minutes,
         "pull request origin and merge time")
 
 # Pull requests merge time at the proejct level
@@ -245,7 +356,7 @@ ranksum(subset(aggregate(cbind(test_lines_per_kloc, mergetime_minutes) ~ project
         "good testing vs mergetime")
 
 mean.testing.per.project <- aggregate(cbind(test_lines_per_kloc, mergetime_minutes) ~ project_name, merged, mean)
-ranksum(head(mean.testing.per.project[order(mean.testing.per.project$test_lines_per_kloc),], 20)$mergetime_minutes, 
+ranksum(head(mean.testing.per.project[order(mean.testing.per.project$test_lines_per_kloc),], 20)$mergetime_minutes,
         tail(mean.testing.per.project[order(mean.testing.per.project$test_lines_per_kloc),], 20)$mergetime_minutes)
 
 # Pull request discusion
@@ -262,7 +373,7 @@ cor.test(non_merged$lifetime_minutes, non_merged$num_comments, method = "spearma
 has.code.review <- function(row) {
   q = sprintf("select count(*) as cnt from pull_request_comments prc where prc.pull_request_id = %d", row$pull_req_id)
   printf("%s/%s",row$project_name,row$github_id)
-  res <- dbSendQuery(con,q) 
+  res <- dbSendQuery(con,q)
   num_code_review <- fetch(res, n = -1)
   num_code_review > 0
 }
@@ -280,13 +391,13 @@ ranksum(subset(reviewed, merged == T)$lifetime_minutes,
 num.participants <- function(row) {
   q = sprintf("select count(distinct(user_id)) as participants from (select user_id from pull_request_comments where pull_request_id = %s union select user_id from issue_comments ic, issues i where i.id = ic.issue_id and i.pull_request_id = %s) as users", row[1], row[1])
   printf("%s/%s",row[2],row[4])
-  res <- dbSendQuery(con,q) 
+  res <- dbSendQuery(con,q)
   participants <- fetch(res, n = -1)$participants
   print(participants)
   participants
 }
 
-all$num_participants <- apply(all, 1, num.participants)
+# all$num_participants <- apply(all, 1, num.participants)
 
 
 # Pull request conflicts, do they affect merge time?
